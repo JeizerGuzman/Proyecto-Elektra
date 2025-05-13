@@ -1,41 +1,26 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import conexion  # Asegúrate que 'conexion.py' está en el mismo directorio
 
 class CategoriaApp:
     def __init__(self, container):
-        """
-        container: Frame donde se dibujará la interfaz (desde el menú principal).
-        """
         self.container = container
-        # Limpia el contenedor para cargar la nueva interfaz
         for widget in self.container.winfo_children():
             widget.destroy()
         self.container.configure(bg="white")
-        
-        # Simulación: registros de categorías (sin conexión a BD)
-        # Cada categoría tendrá: id y nombre.
-        self.categorias = [
-            {"id": "C001", "nombre": "Electrónica"},
-            {"id": "C002", "nombre": "Ropa"},
-            {"id": "C003", "nombre": "Alimentos"}
-        ]
-        
-        # -------------------------------------------
-        # Título "CATEGORÍAS"
-        # -------------------------------------------
 
-        
-        # -------------------------------------------
-        # Frame principal (dividido en dos secciones)
-        # -------------------------------------------
+        # Conexión a la base de datos
+        self.db = conexion.conectar()
+        self.cursor = self.db.cursor()
+
+        # ---------------- INTERFAZ ------------------
+
         main_frame = tk.Frame(self.container, bg="white")
         main_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-        # Sección Izquierda (para búsqueda y lista de categorías)
+
         left_frame = tk.Frame(main_frame, bg="white")
         left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # 1) Barra de búsqueda (por ID de categoría)
+
         search_frame = tk.Frame(left_frame, bg="white", padx=10, pady=10)
         search_frame.pack(side=tk.TOP, fill=tk.X)
         tk.Label(search_frame, text="Buscar ID Categoría:", font=("Helvetica", 10), bg="white")\
@@ -46,8 +31,7 @@ class CategoriaApp:
         btn_buscar = tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
                                command=self.buscar_categoria)
         btn_buscar.pack(side=tk.LEFT, padx=5)
-        
-        # 2) Treeview (muestra ID y Nombre de la categoría)
+
         self.tree = ttk.Treeview(left_frame, columns=("id", "nombre"), show="headings", height=20)
         self.tree.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=10)
         self.tree.heading("id", text="ID Categoría", anchor="center")
@@ -58,12 +42,10 @@ class CategoriaApp:
         scroll_y.pack(side=tk.LEFT, fill=tk.Y)
         self.tree.configure(yscrollcommand=scroll_y.set)
         self.tree.bind("<ButtonRelease-1>", self.seleccionar_categoria_lista)
-        
-        # Sección Derecha (formulario y botones)
+
         right_frame = tk.Frame(main_frame, bg="white")
         right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # Frame para botones (Nuevo, Eliminar, Guardar)
+
         btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         btn_right_frame.pack(side=tk.TOP, fill=tk.X)
         btn_nuevo = tk.Button(btn_right_frame, text="Nueva Categoría", font=("Helvetica", 10, "bold"),
@@ -75,129 +57,108 @@ class CategoriaApp:
         btn_guardar = tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"),
                                 bg="green", fg="white", width=8, command=self.guardar_categoria)
         btn_guardar.pack(side=tk.LEFT, padx=5)
-        
-        # Frame del formulario
+
         form_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         form_right_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-        # Variables del formulario
+
         self.id_var = tk.StringVar()
         self.nombre_var = tk.StringVar()
-        
-        # Etiquetas y entradas (dispuestas en grid)
+
         tk.Label(form_right_frame, text="ID Categoría:", font=("Helvetica", 10), bg="white")\
             .grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
         self.id_entry = tk.Entry(form_right_frame, textvariable=self.id_var, width=25, font=("Helvetica", 10))
         self.id_entry.grid(row=0, column=1, padx=5, pady=5)
-        
+
         tk.Label(form_right_frame, text="Nombre Categoría:", font=("Helvetica", 10), bg="white")\
             .grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
         self.nombre_entry = tk.Entry(form_right_frame, textvariable=self.nombre_var, width=25, font=("Helvetica", 10))
         self.nombre_entry.grid(row=1, column=1, padx=5, pady=5)
-        
-        # Carga la lista de categorías en el Treeview de la sección izquierda
+
         self.cargar_lista_categorias()
-    
-    # --------------------------------------------------
-    # Funciones para la sección IZQUIERDA
-    # --------------------------------------------------
+
+    # ---------------- FUNCIONES ------------------
+
     def cargar_lista_categorias(self, filtro=""):
-        """Carga en el Treeview (izquierdo) las categorías existentes.
-        Si 'filtro' no está vacío, filtra por el ID de la categoría."""
         for item in self.tree.get_children():
             self.tree.delete(item)
-        for categoria in self.categorias:
+        try:
             if filtro:
-                if filtro not in categoria["id"]:
-                    continue
-            self.tree.insert("", tk.END, values=(categoria["id"], categoria["nombre"]))
-    
+                self.cursor.execute("SELECT id_categoria, nombre FROM Categoria WHERE id_categoria LIKE %s", (f"%{filtro}%",))
+            else:
+                self.cursor.execute("SELECT id_categoria, nombre FROM Categoria")
+            filas = self.cursor.fetchall()
+            for fila in filas:
+                self.tree.insert("", tk.END, values=(fila[0], fila[1]))
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo cargar la lista: {e}")
+
     def buscar_categoria(self):
-        """Filtra las categorías por el ID usando el valor del Entry de búsqueda."""
         filtro = self.buscar_var.get().strip()
         self.cargar_lista_categorias(filtro)
-    
+
     def seleccionar_categoria_lista(self, event):
-        """Cuando se selecciona una categoría en el Treeview, carga sus datos en el formulario."""
         item = self.tree.focus()
         if not item:
             return
-        valores = self.tree.item(item, "values")  # (id, nombre)
+        valores = self.tree.item(item, "values")
         if valores:
             id_cat, _ = valores
             self.cargar_datos_categoria(id_cat)
-    
-    # --------------------------------------------------
-    # Funciones para la sección DERECHA
-    # --------------------------------------------------
+
     def nueva_categoria(self):
-        """Limpia el formulario para agregar una nueva categoría."""
         self.limpiar_formulario()
-    
+
     def guardar_categoria(self):
-        """
-        Inserta o actualiza la categoría en el registro simulado.
-        Se compara por ID.
-        """
         id_cat = self.id_var.get().strip()
         nombre = self.nombre_var.get().strip()
-        
-        # Validaciones básicas
-        if not id_cat:
-            messagebox.showwarning("Validación", "El ID de la categoría es obligatorio.")
+        if not id_cat or not nombre:
+            messagebox.showwarning("Validación", "Debe ingresar ID y Nombre.")
             return
-        if not nombre:
-            messagebox.showwarning("Validación", "El nombre de la categoría es obligatorio.")
-            return
-        
-        existe = False
-        for categoria in self.categorias:
-            if categoria["id"] == id_cat:
-                # Actualizar
-                categoria["nombre"] = nombre
-                existe = True
-                messagebox.showinfo("Éxito", "Categoría actualizada correctamente.")
-                break
-        if not existe:
-            # Insertar nueva categoría
-            self.categorias.append({
-                "id": id_cat,
-                "nombre": nombre
-            })
-            messagebox.showinfo("Éxito", "Categoría insertada correctamente.")
-        self.limpiar_formulario()
-        self.cargar_lista_categorias()
-    
+        try:
+            self.cursor.execute("SELECT COUNT(*) FROM Categoria WHERE id_categoria = %s", (id_cat,))
+            existe = self.cursor.fetchone()[0] > 0
+            if existe:
+                self.cursor.execute("UPDATE Categoria SET nombre = %s WHERE id_categoria = %s", (nombre, id_cat))
+                messagebox.showinfo("Actualizado", "Categoría actualizada.")
+            else:
+                self.cursor.execute("INSERT INTO Categoria (id_categoria, nombre) VALUES (%s, %s)", (id_cat, nombre))
+                messagebox.showinfo("Insertado", "Categoría agregada.")
+            self.db.commit()
+            self.limpiar_formulario()
+            self.cargar_lista_categorias()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo guardar: {e}")
+
     def eliminar_categoria(self):
-        """Elimina la categoría cuyo ID se muestra en el formulario."""
         id_cat = self.id_var.get().strip()
         if not id_cat:
             messagebox.showwarning("Validación", "No hay ID para eliminar.")
             return
         if not messagebox.askyesno("Confirmar", f"¿Eliminar la categoría con ID {id_cat}?"):
             return
-        eliminado = False
-        for i, categoria in enumerate(self.categorias):
-            if categoria["id"] == id_cat:
-                del self.categorias[i]
-                eliminado = True
-                messagebox.showinfo("Éxito", "Categoría eliminada correctamente.")
-                break
-        if not eliminado:
-            messagebox.showerror("Error", "No se encontró la categoría para eliminar.")
-        self.limpiar_formulario()
-        self.cargar_lista_categorias()
-    
+        try:
+            self.cursor.execute("DELETE FROM Categoria WHERE id_categoria = %s", (id_cat,))
+            self.db.commit()
+            if self.cursor.rowcount:
+                messagebox.showinfo("Eliminado", "Categoría eliminada.")
+            else:
+                messagebox.showwarning("Aviso", "Categoría no encontrada.")
+            self.limpiar_formulario()
+            self.cargar_lista_categorias()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo eliminar: {e}")
+
     def cargar_datos_categoria(self, id_cat):
-        """Carga los datos de una categoría en el formulario."""
-        for categoria in self.categorias:
-            if categoria["id"] == id_cat:
-                self.id_var.set(categoria["id"])
-                self.nombre_var.set(categoria["nombre"])
-                break
-    
+        try:
+            self.cursor.execute("SELECT id_categoria, nombre FROM Categoria WHERE id_categoria = %s", (id_cat,))
+            fila = self.cursor.fetchone()
+            if fila:
+                self.id_var.set(fila[0])
+                self.nombre_var.set(fila[1])
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo cargar los datos: {e}")
+
     def limpiar_formulario(self):
-        """Limpia todos los campos del formulario."""
         self.id_var.set("")
         self.nombre_var.set("")
 

@@ -2,136 +2,112 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 import os
-
+import conexion  # tu módulo conexion.py
 
 class VentanaLogin:
     def __init__(self):
-        self.ventana_contraseña = tk.Tk()
-        self.ventana_contraseña.title("Inicar sesion - Login")
-        self.ventana_contraseña.state("zoomed")
-        self.ventana_contraseña.config(bg="white")
-        self.ventana_contraseña.resizable(False, False)
+        self.ventana = tk.Tk()
+        self.ventana.title("Iniciar sesión - Login")
+        self.ventana.state("zoomed")
+        self.ventana.config(bg="white")
+        self.ventana.resizable(False, False)
 
-        self.ventana_contraseña.update()
-        self.ancho_ventana = self.ventana_contraseña.winfo_width()
-        self.alto_ventana = self.ventana_contraseña.winfo_height()
-        
-        
-        # Obtiene el directorio donde se encuentra el script actual
-        directorio_actual = os.path.dirname(os.path.abspath(__file__))
-        # Construye la ruta relativa a la imagen
-        ruta_imagen = os.path.join(directorio_actual, "imagen", "image.png")
-        
+        # Conexión y cursor
+        self.db = conexion.conectar()
+        self.cursor = self.db.cursor()
+
+        # Fondo y logo
+        self._cargar_fondo()
+        self.widget = tk.LabelFrame(self.ventana, width=400, height=500, bg="white")
+        self.widget.pack(side=tk.TOP, pady=100)
+        self.widget.pack_propagate(False)
+        self._cargar_logo()
+
+        # Usuario (por nombre)
+        tk.Label(self.widget, text="Usuario", font=("tahoma",12,"bold"), bg="white").pack()
+        self.nombre_var = tk.StringVar()
+        # Carga nombres desde BD
+        self.cursor.execute("SELECT nombre FROM Usuarios")
+        nombres = [r[0] for r in self.cursor.fetchall()]
+        self.cmb_usuario = ttk.Combobox(self.widget, values=nombres, textvariable=self.nombre_var)
+        self.cmb_usuario.config(font=("tahoma",12), width=23)
+        self.cmb_usuario.bind("<<ComboboxSelected>>", self._mostrar_cargo)
+        self.cmb_usuario.pack()
+
+        # Cargo mostrado
+        self.cargo_label = tk.Label(self.widget, text="Cargo: ", font=("tahoma",12), bg="white")
+        self.cargo_label.pack(pady=5)
+
+        # Contraseña
+        tk.Label(self.widget, text="Contraseña", font=("tahoma",12,"bold"), bg="white").pack()
+        self.entry_pwd = tk.Entry(self.widget, show="*", font=("tahoma",12), width=25)
+        self.entry_pwd.pack()
+        self.var_show = tk.BooleanVar()
+        tk.Checkbutton(self.widget, text="Ver contraseña", variable=self.var_show,
+                       command=self._ver_contraseña, font=("tahoma",12), bg="white").pack(pady=10)
+
+        # Botón Iniciar
+        tk.Button(self.widget, text="Iniciar Sesión", command=self._iniciar_sesion,
+                  fg="white", bg="green", font=("tahoma",12), width=15).pack(pady=20)
+
+    def _cargar_fondo(self):
+        dir_act = os.path.dirname(os.path.abspath(__file__))
+        ruta = os.path.join(dir_act, "imagen", "image.png")
         try:
-            self.imagen_original = Image.open(ruta_imagen)
-        except IOError:
-            messagebox.showerror("Error", "No se pudo cargar la imagen. Verifica la ruta o los recursos.")
-            # Aquí puedes definir una acción alternativa, como cargar una imagen por defecto
-        
-        self.imagen_fondo_redimensionada = self.imagen_original.resize(
-            (self.ancho_ventana, self.alto_ventana), resample=Image.Resampling.LANCZOS
-        )
-        self.bg_image = ImageTk.PhotoImage(self.imagen_fondo_redimensionada)
+            img = Image.open(ruta)
+            w, h = self.ventana.winfo_screenwidth(), self.ventana.winfo_screenheight()
+            img = img.resize((w, h), Image.Resampling.LANCZOS)
+            self.bg_img = ImageTk.PhotoImage(img)
+            tk.Label(self.ventana, image=self.bg_img).place(x=0, y=0, relwidth=1, relheight=1)
+        except:
+            pass
 
-        self.bg_label = tk.Label(self.ventana_contraseña, image=self.bg_image)
-        self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+    def _cargar_logo(self):
+        dir_act = os.path.dirname(os.path.abspath(__file__))
+        ruta = os.path.join(dir_act, "imagen", "logoElektra.png")
+        try:
+            logo = Image.open(ruta).resize((200,150), Image.Resampling.LANCZOS)
+            self.logo_img = ImageTk.PhotoImage(logo)
+            frame = tk.Frame(self.widget, bg="white", width=300, height=200)
+            frame.pack(); frame.pack_propagate(False)
+            tk.Label(frame, image=self.logo_img, bg="white").pack(pady=20)
+        except:
+            pass
 
+    def _mostrar_cargo(self, event):
+        nombre = self.nombre_var.get()
+        self.cursor.execute("SELECT departamento FROM Usuarios WHERE nombre=%s", (nombre,))
+        row = self.cursor.fetchone()
+        cargo = row[0] if row else ''
+        self.cargo_label.config(text=f"Cargo: {cargo}")
 
-        self.widget_central = tk.LabelFrame(self.ventana_contraseña, text="")
-        self.widget_central.config(width=400, height=500)
-        self.widget_central.pack(side=tk.TOP, pady=100)
-        self.widget_central.pack_propagate(False)
+    def _ver_contraseña(self):
+        self.entry_pwd.config(show='' if self.var_show.get() else '*')
 
-        self.relleno2 = tk.Frame(self.widget_central, width=300, height=200)
-        self.relleno2.pack()
-        self.relleno2.pack_propagate(False)
-
-        # Obtiene el directorio donde se encuentra el script actual
-        directorio_actual = os.path.dirname(os.path.abspath(__file__))
-        # Construye la ruta relativa a la imagen
-        ruta_imagen = os.path.join(directorio_actual, "imagen", "logoElektra.png")
-
-        self.imagen_logo = Image.open(ruta_imagen)
-        self.imagen_logo_redimensionada = self.imagen_logo.resize(
-            (200, 150), resample=Image.Resampling.LANCZOS
-        )
-        self.imagen_relleno = ImageTk.PhotoImage(self.imagen_logo_redimensionada)
-
-        self.lbl_imagen_relleno = tk.Label(self.relleno2, image=self.imagen_relleno)
-        self.lbl_imagen_relleno.pack(expand=True, pady=20)
-
-        self.lbl_nombre_usuario = tk.Label(self.widget_central, text="Usuario")
-        self.lbl_nombre_usuario.config(font=("tahoma", 12, "bold"), height=2)
-        self.lbl_nombre_usuario.pack()
-
-        self.variable_usuarios = tk.StringVar()
-        self.usuarios = ["Administrador", "Gerente"]
-        self.seleccionar_usuario = ttk.Combobox(
-            self.widget_central,
-            values=self.usuarios,
-            textvariable=self.variable_usuarios
-        )
-        self.seleccionar_usuario.config(font=("tahoma", 12), width=23)
-        self.seleccionar_usuario.pack()
-
-        self.lbl_contraseña = tk.Label(self.widget_central, text="Contraseña")
-        self.lbl_contraseña.config(font=("tahoma", 12, "bold"), height=2)
-        self.lbl_contraseña.pack()
-
-        self.entry_contraseña = tk.Entry(self.widget_central, show="*")
-        self.entry_contraseña.config(font=("tahoma", 12), width=25)
-        self.entry_contraseña.pack()
-
-        self.variable_contraseña = tk.BooleanVar()
-        self.ver_contraseña = tk.Checkbutton(
-            self.widget_central,
-            text="Ver contraseña",
-            variable=self.variable_contraseña,
-            command=self.ver_contraseña_func
-        )
-        self.ver_contraseña.config(font=("tahoma", 12), width=25)
-        self.ver_contraseña.pack(pady=10)
-
-        self.btn_iniciar_sesion = tk.Button(
-            self.widget_central,
-            text="Iniciar Sesion",
-            command=self.iniciar_sesion
-        )
-        self.btn_iniciar_sesion.config(fg="white", bg="green", font=("tahoma", 12), width=15)
-        self.btn_iniciar_sesion.pack(pady=20)
-
-    def limpiar_ventana(self):
-        for widget in self.ventana_contraseña.winfo_children():
-            widget.destroy()
-
-    def ver_contraseña_func(self):
-        if self.variable_contraseña.get():
-            self.entry_contraseña.config(show="")
-        else:
-            self.entry_contraseña.config(show="*")
-
-    def iniciar_sesion(self):
+    def _iniciar_sesion(self):
+        nombre = self.nombre_var.get().strip()
+        pwd = self.entry_pwd.get().strip()
+        if not nombre:
+            messagebox.showerror("Error", "Selecciona un usuario")
+            return
+        if not pwd:
+            messagebox.showerror("Error", "La contraseña no puede estar vacía")
+            return
+        self.cursor.execute("SELECT contraseña FROM Usuarios WHERE nombre=%s", (nombre,))
+        row = self.cursor.fetchone()
+        if not row:
+            messagebox.showerror("Error", "Usuario no encontrado")
+            return
+        if pwd != row[0]:
+            messagebox.showerror("Error", "Contraseña incorrecta")
+            return
+        # Login exitoso
         from menu import PuntoDeVenta
-        usuario_encontrado = 0
-        contraseña = "7"
-        for usuario in self.usuarios:
-            if usuario == self.variable_usuarios.get():
-                usuario_encontrado = 1
-
-        self.usuario_seleccionado = self.variable_usuarios.get()
-        if usuario_encontrado == 0:
-            messagebox.showerror("Error", "El usuario no existe")
-        elif len(self.entry_contraseña.get()) == 0:
-            messagebox.showerror("Error", "La contraseña no tiene que tener campos vacíos")
-        elif not self.entry_contraseña.get() == contraseña:
-            messagebox.showerror("Error", "Contraseña Incorrecta")
-        else:
-            self.limpiar_ventana()
-            PuntoDeVenta(self.ventana_contraseña,usuario=self.usuario_seleccionado).main()
+        self.widget.destroy()
+        PuntoDeVenta(self.ventana, usuario=nombre).main()
 
     def run(self):
-        self.ventana_contraseña.mainloop()
-
+        self.ventana.mainloop()
 
 if __name__ == "__main__":
     app = VentanaLogin()

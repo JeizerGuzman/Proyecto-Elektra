@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import conexion  # Asegúrate de que conexion.py está en el mismo directorio
 
 class ProveedorApp:
     def __init__(self, container):
@@ -12,20 +13,17 @@ class ProveedorApp:
             widget.destroy()
         self.container.configure(bg="white")
         
-        # Simulación: registros de proveedores (sin conexión a BD)
-        # Cada proveedor tiene: id, empresa, representante y teléfono.
-        self.proveedores = [
-            {"id": "P001", "empresa": "Empresa A", "representante": "Representante A", "telefono": "9991234567"},
-            {"id": "P002", "empresa": "Empresa B", "representante": "Representante B", "telefono": "9987654321"}
-        ]
+        # Conexión a la base de datos
+        self.db = conexion.conectar()
+        self.cursor = self.db.cursor()
         
         # -------------------------------------------
         # Título "PROVEEDORES"
         # -------------------------------------------
         title_frame = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
         title_frame.pack(side=tk.TOP, fill=tk.X)
-        lbl_title = tk.Label(title_frame, text="PROVEEDORES", font=("Helvetica", 14, "bold"), bg="#ECECEC")
-        lbl_title.pack(side=tk.LEFT)
+        tk.Label(title_frame, text="PROVEEDORES", font=("Helvetica", 14, "bold"), bg="#ECECEC")\
+            .pack(side=tk.LEFT)
         
         # -------------------------------------------
         # Frame principal (dividido en dos secciones)
@@ -43,21 +41,17 @@ class ProveedorApp:
         tk.Label(search_frame, text="Buscar ID Proveedor:", font=("Helvetica", 10), bg="white")\
             .pack(side=tk.LEFT)
         self.buscar_var = tk.StringVar()
-        entry_buscar = tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))
-        entry_buscar.pack(side=tk.LEFT, padx=5)
-        btn_buscar = tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
-                               command=self.buscar_proveedor)
-        btn_buscar.pack(side=tk.LEFT, padx=5)
+        tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))\
+            .pack(side=tk.LEFT, padx=5)
+        tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
+                  command=self.buscar_proveedor).pack(side=tk.LEFT, padx=5)
         
         # 2) Treeview (muestra ID, Empresa y Representante)
         self.tree = ttk.Treeview(left_frame, columns=("id", "empresa", "representante"), show="headings", height=20)
         self.tree.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=10)
-        self.tree.heading("id", text="ID Proveedor", anchor="center")
-        self.tree.heading("empresa", text="Empresa", anchor="center")
-        self.tree.heading("representante", text="Representante", anchor="center")
-        self.tree.column("id", width=100, anchor="center")
-        self.tree.column("empresa", width=200, anchor="center")
-        self.tree.column("representante", width=200, anchor="center")
+        for col, txt, w in [("id","ID Proveedor",100),("empresa","Empresa",200),("representante","Representante",200)]:
+            self.tree.heading(col, text=txt, anchor="center")
+            self.tree.column(col, width=w, anchor="center")
         scroll_y = ttk.Scrollbar(left_frame, orient="vertical", command=self.tree.yview)
         scroll_y.pack(side=tk.LEFT, fill=tk.Y)
         self.tree.configure(yscrollcommand=scroll_y.set)
@@ -70,172 +64,143 @@ class ProveedorApp:
         # Frame para botones (Nuevo, Eliminar, Guardar)
         btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         btn_right_frame.pack(side=tk.TOP, fill=tk.X)
-        btn_nuevo = tk.Button(btn_right_frame, text="Nuevo Proveedor", font=("Helvetica", 10, "bold"), bg="#87CEEB", fg="white",
-                              width=15, command=self.nuevo_proveedor)
-        btn_nuevo.pack(side=tk.LEFT, padx=5)
-        btn_eliminar = tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"), bg="red", fg="white",
-                                 width=8, command=self.eliminar_proveedor)
-        btn_eliminar.pack(side=tk.LEFT, padx=5)
-        btn_guardar = tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"), bg="green", fg="white",
-                                width=8, command=self.guardar_proveedor)
-        btn_guardar.pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_right_frame, text="Nuevo Proveedor", font=("Helvetica", 10, "bold"),
+                  bg="#87CEEB", fg="white", width=15, command=self.nuevo_proveedor)\
+            .pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"),
+                  bg="red", fg="white", width=8, command=self.eliminar_proveedor)\
+            .pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"),
+                  bg="green", fg="white", width=8, command=self.guardar_proveedor)\
+            .pack(side=tk.LEFT, padx=5)
         
         # Frame del formulario
         form_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         form_right_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         # Variables del formulario
-        self.telefono_var = tk.StringVar()
         self.id_var = tk.StringVar()
         self.empresa_var = tk.StringVar()
         self.representante_var = tk.StringVar()
+        self.telefono_var = tk.StringVar()
         
         # Etiquetas y entradas (dispuestas en grid)
-        tk.Label(form_right_frame, text="Teléfono (10 dígitos):", font=("Helvetica", 10), bg="white")\
-            .grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
-        self.telefono_entry = tk.Entry(form_right_frame, textvariable=self.telefono_var, width=25, font=("Helvetica", 10))
-        self.telefono_entry.grid(row=1, column=1, padx=5, pady=5)
+        labels = [
+            ("ID Proveedor:", self.id_var, 0),
+            ("Teléfono (10 dígitos):", self.telefono_var, 1),
+            ("Empresa:", self.empresa_var, 2),
+            ("Representante:", self.representante_var, 3),
+        ]
+        for text, var, row in labels:
+            tk.Label(form_right_frame, text=text, font=("Helvetica", 10), bg="white")\
+                .grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
+            tk.Entry(form_right_frame, textvariable=var, width=25, font=("Helvetica", 10))\
+                .grid(row=row, column=1, padx=5, pady=5)
         
-        tk.Label(form_right_frame, text="ID Proveedor:", font=("Helvetica", 10), bg="white")\
-            .grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
-        self.id_entry = tk.Entry(form_right_frame, textvariable=self.id_var, width=25, font=("Helvetica", 10))
-        self.id_entry.grid(row=0, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="Empresa:", font=("Helvetica", 10), bg="white")\
-            .grid(row=2, column=0, sticky=tk.E, padx=5, pady=5)
-        self.empresa_entry = tk.Entry(form_right_frame, textvariable=self.empresa_var, width=25, font=("Helvetica", 10))
-        self.empresa_entry.grid(row=2, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="Representante:", font=("Helvetica", 10), bg="white")\
-            .grid(row=3, column=0, sticky=tk.E, padx=5, pady=5)
-        self.representante_entry = tk.Entry(form_right_frame, textvariable=self.representante_var, width=25, font=("Helvetica", 10))
-        self.representante_entry.grid(row=3, column=1, padx=5, pady=5)
-        
-        # Carga la lista de proveedores en el Treeview de la sección izquierda
+        # Carga inicial de proveedores
         self.cargar_lista_proveedores()
     
     # --------------------------------------------------
     # Funciones para la sección IZQUIERDA
     # --------------------------------------------------
     def cargar_lista_proveedores(self, filtro=""):
-        """Carga en el Treeview (izquierdo) los proveedores existentes.
-        Si 'filtro' no está vacío, filtra por el ID del proveedor."""
+        """Carga en el Treeview los proveedores desde la BD."""
         for item in self.tree.get_children():
             self.tree.delete(item)
-        for proveedor in self.proveedores:
-            if filtro:
-                if filtro not in proveedor["id"]:
-                    continue
-            # Se muestran en la tabla: id, empresa y representante
-            self.tree.insert("", tk.END, values=(proveedor["id"],
-                                                 proveedor["empresa"],
-                                                 proveedor["representante"]))
+        sql = "SELECT id_proveedor, nombre, representante FROM Proveedor"
+        params = ()
+        if filtro:
+            sql += " WHERE id_proveedor LIKE %s"
+            params = (f"%{filtro}%",)
+        self.cursor.execute(sql, params)
+        for idp, empresa, rep in self.cursor.fetchall():
+            self.tree.insert("", tk.END, values=(idp, empresa, rep))
     
     def buscar_proveedor(self):
-        """Filtra los proveedores por el ID usando el valor del Entry de búsqueda."""
         filtro = self.buscar_var.get().strip()
         self.cargar_lista_proveedores(filtro)
     
     def seleccionar_proveedor_lista(self, event):
-        """Cuando se selecciona un proveedor en el Treeview de la izquierda,
-        carga sus datos en el formulario de la sección derecha."""
-        item = self.tree.focus()
-        if not item:
+        sel = self.tree.focus()
+        if not sel:
             return
-        valores = self.tree.item(item, "values")  # (id, empresa, representante)
-        if valores:
-            id_prov, _, _ = valores
-            self.cargar_datos_proveedor(id_prov)
+        idp, empresa, rep = self.tree.item(sel, "values")
+        self.id_var.set(idp)
+        self.empresa_var.set(empresa)
+        self.representante_var.set(rep)
+        # Carga teléfono aparte
+        self.cursor.execute("SELECT telefono FROM Proveedor WHERE id_proveedor = %s", (idp,))
+        row = self.cursor.fetchone()
+        self.telefono_var.set(row[0] if row else "")
     
     # --------------------------------------------------
     # Funciones para la sección DERECHA
     # --------------------------------------------------
     def nuevo_proveedor(self):
-        """Limpia el formulario de la sección derecha para agregar un nuevo proveedor."""
-        self.limpiar_formulario()
-    
-    def guardar_proveedor(self):
-        """
-        Inserta o actualiza el proveedor en el registro simulado.
-        Se almacenan en la lista self.proveedores y se compara por ID.
-        """
-        telefono = self.telefono_var.get().strip()
-        id_prov = self.id_var.get().strip()
-        empresa = self.empresa_var.get().strip()
-        representante = self.representante_var.get().strip()
-        
-        # Validaciones básicas
-        if len(telefono) != 10 or not telefono.isdigit():
-            messagebox.showwarning("Validación", "El teléfono debe tener 10 dígitos numéricos.")
-            return
-        if not id_prov:
-            messagebox.showwarning("Validación", "El ID del proveedor es obligatorio.")
-            return
-        if not empresa:
-            messagebox.showwarning("Validación", "El nombre de la empresa es obligatorio.")
-            return
-        if not representante:
-            messagebox.showwarning("Validación", "El nombre del representante es obligatorio.")
-            return
-        
-        existe = False
-        for proveedor in self.proveedores:
-            if proveedor["id"] == id_prov:
-                # Actualizar
-                proveedor["telefono"] = telefono
-                proveedor["empresa"] = empresa
-                proveedor["representante"] = representante
-                existe = True
-                messagebox.showinfo("Éxito", "Proveedor actualizado correctamente.")
-                break
-        if not existe:
-            # Insertar nuevo proveedor
-            self.proveedores.append({
-                "id": id_prov,
-                "telefono": telefono,
-                "empresa": empresa,
-                "representante": representante
-            })
-            messagebox.showinfo("Éxito", "Proveedor insertado correctamente.")
-        self.limpiar_formulario()
-        self.cargar_lista_proveedores()
-    
-    def eliminar_proveedor(self):
-        """Elimina el proveedor cuyo ID se muestra en el formulario de la sección derecha."""
-        id_prov = self.id_var.get().strip()
-        if not id_prov:
-            messagebox.showwarning("Validación", "No hay ID para eliminar.")
-            return
-        if not messagebox.askyesno("Confirmar", f"¿Eliminar al proveedor con ID {id_prov}?"):
-            return
-        eliminado = False
-        for i, proveedor in enumerate(self.proveedores):
-            if proveedor["id"] == id_prov:
-                del self.proveedores[i]
-                eliminado = True
-                messagebox.showinfo("Éxito", "Proveedor eliminado correctamente.")
-                break
-        if not eliminado:
-            messagebox.showerror("Error", "No se encontró el proveedor para eliminar.")
-        self.limpiar_formulario()
-        self.cargar_lista_proveedores()
-    
-    def cargar_datos_proveedor(self, id_prov):
-        """Carga los datos completos de un proveedor en el formulario de la sección derecha."""
-        for proveedor in self.proveedores:
-            if proveedor["id"] == id_prov:
-                self.telefono_var.set(proveedor["telefono"])
-                self.id_var.set(proveedor["id"])
-                self.empresa_var.set(proveedor["empresa"])
-                self.representante_var.set(proveedor["representante"])
-                break
-    
-    def limpiar_formulario(self):
-        """Limpia todos los campos del formulario de la sección derecha."""
-        self.telefono_var.set("")
+        """Limpia el formulario para un nuevo registro."""
         self.id_var.set("")
         self.empresa_var.set("")
         self.representante_var.set("")
+        self.telefono_var.set("")
+    
+    def guardar_proveedor(self):
+        idp = self.id_var.get().strip()
+        empresa = self.empresa_var.get().strip()
+        rep = self.representante_var.get().strip()
+        tel = self.telefono_var.get().strip()
+        
+        # Validaciones
+        if not idp:
+            messagebox.showwarning("Validación", "El ID del proveedor es obligatorio.")
+            return
+        if not empresa or not rep:
+            messagebox.showwarning("Validación", "Empresa y representante son obligatorios.")
+            return
+        if len(tel) != 10 or not tel.isdigit():
+            messagebox.showwarning("Validación", "El teléfono debe tener 10 dígitos numéricos.")
+            return
+        
+        # Insert o Update
+        self.cursor.execute("SELECT 1 FROM Proveedor WHERE id_proveedor = %s", (idp,))
+        if self.cursor.fetchone():
+            sql = """
+                UPDATE Proveedor
+                   SET nombre=%s, representante=%s, telefono=%s
+                 WHERE id_proveedor=%s
+            """
+            params = (empresa, rep, tel, idp)
+            message = "Proveedor actualizado correctamente."
+        else:
+            sql = """
+                INSERT INTO Proveedor (id_proveedor, nombre, representante, telefono)
+                VALUES (%s, %s, %s, %s)
+            """
+            params = (idp, empresa, rep, tel)
+            message = "Proveedor insertado correctamente."
+        try:
+            self.cursor.execute(sql, params)
+            self.db.commit()
+            messagebox.showinfo("Éxito", message)
+            self.nuevo_proveedor()
+            self.cargar_lista_proveedores()
+        except Exception as e:
+            messagebox.showerror("Error al guardar", str(e))
+    
+    def eliminar_proveedor(self):
+        idp = self.id_var.get().strip()
+        if not idp:
+            messagebox.showwarning("Validación", "No hay ID para eliminar.")
+            return
+        if not messagebox.askyesno("Confirmar", f"¿Eliminar proveedor {idp}?"):
+            return
+        try:
+            self.cursor.execute("DELETE FROM Proveedor WHERE id_proveedor = %s", (idp,))
+            self.db.commit()
+            messagebox.showinfo("Éxito", "Proveedor eliminado correctamente.")
+            self.nuevo_proveedor()
+            self.cargar_lista_proveedores()
+        except Exception as e:
+            messagebox.showerror("Error al eliminar", str(e))
 
 # Para probar de forma independiente:
 if __name__ == "__main__":

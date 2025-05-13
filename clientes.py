@@ -1,256 +1,191 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import conexion  # tu módulo conexion.py
 
 class ClienteApp:
     def __init__(self, container):
         """
-        container: Frame donde se dibujará la interfaz (desde el menú principal).
+        Interfaz de Clientes conectada a la tabla Cliente.
+        Llave primaria: teléfono. Campo nombre almacena nombre completo.
+        Dirección y RFC opcionales activados por checkbox.
         """
         self.container = container
-        # Limpia el contenedor para cargar la nueva interfaz
-        for widget in self.container.winfo_children():
-            widget.destroy()
+        for w in self.container.winfo_children(): w.destroy()
         self.container.configure(bg="white")
-        
-        # En lugar de conectarse a una base de datos, usamos una lista para simular los registros.
-        self.clientes = [
-            {"telefono": "9991234567", "nombre": "Juan Pérez", "direccion": "Calle 1", "rfc": "RFC12345678901"},
-            {"telefono": "9987654321", "nombre": "Ana Torres", "direccion": "Avenida X", "rfc": "RFCABCDEFGHIJKL"}
-        ]
-        
-        # -------------------------------------------
-        # Título "CLIENTES"
-        # -------------------------------------------
-        title_frame = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
-        title_frame.pack(side=tk.TOP, fill=tk.X)
-        lbl_title = tk.Label(title_frame, text="CLIENTES", font=("Helvetica", 14, "bold"), bg="#ECECEC")
-        lbl_title.pack(side=tk.LEFT)
-        
-        # -------------------------------------------
-        # Frame principal (dividido en dos secciones)
-        # -------------------------------------------
-        main_frame = tk.Frame(self.container, bg="white")
-        main_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-        # Sección Izquierda (1/3): Búsqueda y lista de clientes
-        left_frame = tk.Frame(main_frame, bg="white")
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # 1) Barra de búsqueda (por teléfono)
-        search_frame = tk.Frame(left_frame, bg="white", padx=10, pady=10)
-        search_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(search_frame, text="Buscar Teléfono:", font=("Helvetica", 10), bg="white")\
-            .pack(side=tk.LEFT)
-        self.buscar_var = tk.StringVar()
-        entry_buscar = tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))
-        entry_buscar.pack(side=tk.LEFT, padx=5)
-        btn_buscar = tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
-                               command=self.buscar_cliente)
-        btn_buscar.pack(side=tk.LEFT, padx=5)
-        
-        # 2) Treeview (muestra Teléfono y Nombre, con el Nombre centrado)
-        self.tree = ttk.Treeview(left_frame, columns=("telefono", "nombre"), show="headings", height=20)
-        self.tree.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=10)
-        self.tree.heading("telefono", text="Teléfono", anchor="center")
-        self.tree.heading("nombre", text="Nombre", anchor="center")
-        self.tree.column("telefono", width=100, anchor="center")
-        self.tree.column("nombre", width=200, anchor="center")
-        scroll_y = ttk.Scrollbar(left_frame, orient="vertical", command=self.tree.yview)
-        scroll_y.pack(side=tk.LEFT, fill=tk.Y)
-        self.tree.configure(yscrollcommand=scroll_y.set)
-        self.tree.bind("<ButtonRelease-1>", self.seleccionar_cliente_lista)
-        
-        # Sección Derecha (2/3): Botones y formulario de clientes
-        right_frame = tk.Frame(main_frame, bg="white")
-        right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        # Frame para botones (Nuevo, Eliminar, Guardar)
-        btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
-        btn_right_frame.pack(side=tk.TOP, fill=tk.X)
-        btn_nuevo = tk.Button(btn_right_frame, text="Nuevo Cliente", font=("Helvetica", 10, "bold"), bg="#87CEEB", fg="white",
-                              width=12, command=self.nuevo_cliente)
-        btn_nuevo.pack(side=tk.LEFT, padx=5)
-        btn_eliminar = tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"), bg="red", fg="white",
-                                 width=8, command=self.eliminar_cliente)
-        btn_eliminar.pack(side=tk.LEFT, padx=5)
-        btn_guardar = tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"), bg="green", fg="white",
-                                width=8, command=self.guardar_cliente)
-        btn_guardar.pack(side=tk.LEFT, padx=5)
-        
-        # Frame del formulario
-        form_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
-        form_right_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        
-        # Variables del formulario
+
+        # Conexión
+        self.db = conexion.conectar()
+        self.cursor = self.db.cursor()
+
+        # Cabecera
+        header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        header.pack(fill=tk.X)
+        tk.Label(header, text="CLIENTES", font=("Helvetica",14,"bold"), bg="#ECECEC").pack(side=tk.LEFT)
+
+        # Layout
+        main = tk.Frame(self.container, bg="white")
+        main.pack(fill=tk.BOTH, expand=True)
+
+        # Izquierda: lista y búsqueda
+        left = tk.Frame(main, bg="white")
+        left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        sf = tk.Frame(left, bg="white", padx=10, pady=10); sf.pack(fill=tk.X)
+        tk.Label(sf, text="Buscar Teléfono:", bg="white").pack(side=tk.LEFT)
+        self.search_var = tk.StringVar()
+        tk.Entry(sf, textvariable=self.search_var, width=15).pack(side=tk.LEFT, padx=5)
+        tk.Button(sf, text="Buscar", bg="#A9A9A9", fg="white", font=("Helvetica",9,"bold"),
+                  command=self.load_clients).pack(side=tk.LEFT)
+
+        cols = ("telefono","nombre")
+        self.tree = ttk.Treeview(left, columns=cols, show="headings", height=20)
+        self.tree.heading("telefono", text="Teléfono"); self.tree.column("telefono", width=100, anchor="center")
+        self.tree.heading("nombre", text="Nombre"); self.tree.column("nombre", width=200, anchor="center")
+        self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        scroll = ttk.Scrollbar(left, orient="vertical", command=self.tree.yview)
+        scroll.pack(side=tk.LEFT, fill=tk.Y)
+        self.tree.configure(yscrollcommand=scroll.set)
+        self.tree.bind("<ButtonRelease-1>", self.on_select_client)
+
+        # Derecha: formulario + botones
+        right = tk.Frame(main, bg="white", padx=10, pady=10)
+        right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        bf = tk.Frame(right, bg="white", pady=10); bf.pack(fill=tk.X)
+        actions = [("Nuevo Cliente", self.new_client, "#87CEEB"),
+                   ("Guardar", self.save_client, "green"),
+                   ("Eliminar", self.delete_client, "red")]
+        for txt, cmd, col in actions:
+            tk.Button(bf, text=txt, bg=col, fg="white", font=("Helvetica",10,"bold"), width=12,
+                      command=cmd).pack(side=tk.LEFT, padx=5)
+
+        form = tk.Frame(right, bg="white", padx=10, pady=10)
+        form.pack(fill=tk.BOTH, expand=True)
+
+        # Variables
         self.telefono_var = tk.StringVar()
-        self.nombre_var = tk.StringVar()   # Nombre(s)
-        self.apellido_var = tk.StringVar()  # Apellido(s)
-        self.direccion_var = tk.StringVar()
-        self.rfc_var = tk.StringVar()
-        
-        # Etiquetas y entradas (dispuestas en grid)
-        tk.Label(form_right_frame, text="Teléfono (10 dígitos):", font=("Helvetica", 10), bg="white")\
-            .grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
-        self.telefono_entry = tk.Entry(form_right_frame, textvariable=self.telefono_var, width=25, font=("Helvetica", 10))
-        self.telefono_entry.grid(row=0, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="Nombre(s):", font=("Helvetica", 10), bg="white")\
-            .grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
-        self.nombre_entry = tk.Entry(form_right_frame, textvariable=self.nombre_var, width=25, font=("Helvetica", 10))
-        self.nombre_entry.grid(row=1, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="Apellido(s):", font=("Helvetica", 10), bg="white")\
-            .grid(row=2, column=0, sticky=tk.E, padx=5, pady=5)
-        self.apellido_entry = tk.Entry(form_right_frame, textvariable=self.apellido_var, width=25, font=("Helvetica", 10))
-        self.apellido_entry.grid(row=2, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="Dirección:", font=("Helvetica", 10), bg="white")\
-            .grid(row=3, column=0, sticky=tk.E, padx=5, pady=5)
-        self.direccion_entry = tk.Entry(form_right_frame, textvariable=self.direccion_var, width=25, font=("Helvetica", 10))
-        self.direccion_entry.grid(row=3, column=1, padx=5, pady=5)
-        
-        tk.Label(form_right_frame, text="RFC:", font=("Helvetica", 10), bg="white")\
-            .grid(row=4, column=0, sticky=tk.E, padx=5, pady=5)
-        self.rfc_entry = tk.Entry(form_right_frame, textvariable=self.rfc_var, width=25, font=("Helvetica", 10))
-        self.rfc_entry.grid(row=4, column=1, padx=5, pady=5)
-        
-        # Carga la lista de clientes en el Treeview de la sección izquierda
-        self.cargar_lista_clientes()
-    
-    # --------------------------------------------------
-    # Funciones para la sección IZQUIERDA
-    # --------------------------------------------------
-    def cargar_lista_clientes(self, filtro=""):
-        """Carga en el Treeview (izquierdo) los clientes existentes. Si 'filtro' no está vacío, filtra por teléfono."""
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        # Simulación: Filtrar la lista interna
-        for cliente in self.clientes:
-            if filtro:
-                if filtro not in cliente["telefono"]:
-                    continue
-            telefono = cliente["telefono"]
-            nombreCompleto = cliente["nombre"]
-            self.tree.insert("", tk.END, values=(telefono, nombreCompleto))
-    
+        self.nombre_var   = tk.StringVar()
+        self.direccion_var= tk.StringVar()
+        self.rfc_var      = tk.StringVar()
+        self.advanced_var = tk.BooleanVar(value=False)
+
+        # Form fields
+        tk.Label(form, text="Teléfono (10 dígitos):", bg="white").grid(row=0,column=0,sticky=tk.E,pady=5)
+        tk.Entry(form, textvariable=self.telefono_var, width=25).grid(row=0,column=1,pady=5)
+        tk.Label(form, text="Nombre:", bg="white").grid(row=1,column=0,sticky=tk.E,pady=5)
+        tk.Entry(form, textvariable=self.nombre_var, width=25).grid(row=1,column=1,pady=5)
+
+        # Checkbox para campos opcionales
+        tk.Checkbutton(form, text="Datos adicionales", variable=self.advanced_var,
+                       command=self.toggle_advanced, bg="white").grid(row=2,column=1, sticky=tk.W)
+
+        # Campos opcionales (ocultos inicialmente)
+        self.dir_label = tk.Label(form, text="Dirección:", bg="white")
+        self.dir_entry = tk.Entry(form, textvariable=self.direccion_var, width=25)
+        self.rfc_label = tk.Label(form, text="RFC:", bg="white")
+        self.rfc_entry = tk.Entry(form, textvariable=self.rfc_var, width=25)
+
+        # Cargar datos
+        self.load_clients()
+
+    def toggle_advanced(self):
+        if self.advanced_var.get():
+            # mostrar
+            self.dir_label.grid(row=3,column=0,sticky=tk.E,pady=5)
+            self.dir_entry.grid(row=3,column=1,pady=5)
+            self.rfc_label.grid(row=4,column=0,sticky=tk.E,pady=5)
+            self.rfc_entry.grid(row=4,column=1,pady=5)
+        else:
+            # ocultar
+            self.dir_label.grid_remove()
+            self.dir_entry.grid_remove()
+            self.rfc_label.grid_remove()
+            self.rfc_entry.grid_remove()
+
+    def load_clients(self):
+        self.tree.delete(*self.tree.get_children())
+        sql = "SELECT telefono, nombre FROM Cliente"
+        params = ()
+        f = self.search_var.get().strip()
+        if f:
+            sql += " WHERE telefono LIKE %s"
+            params = (f"%{f}%",)
+        self.cursor.execute(sql, params)
+        for tel, nm in self.cursor.fetchall():
+            self.tree.insert("",tk.END,values=(tel,nm))
+
     def buscar_cliente(self):
-        """Filtra los clientes por teléfono usando el valor del Entry de búsqueda."""
-        filtro = self.buscar_var.get().strip()
-        self.cargar_lista_clientes(filtro)
-    
-    def seleccionar_cliente_lista(self, event):
-        """Cuando se selecciona un cliente en el Treeview de la izquierda, carga sus datos en el formulario de la derecha."""
-        item = self.tree.focus()
-        if not item:
-            return
-        valores = self.tree.item(item, "values")  # (telefono, nombreCompleto)
-        if valores:
-            telefono, _ = valores
-            self.cargar_datos_cliente(telefono)
-    
-    # --------------------------------------------------
-    # Funciones para la sección DERECHA
-    # --------------------------------------------------
-    def nuevo_cliente(self):
-        """Limpia el formulario de la sección derecha para agregar un nuevo cliente."""
-        self.limpiar_formulario()
-    
-    def guardar_cliente(self):
-        """
-        Inserta o actualiza el cliente según si existe o no el teléfono en el 'registro' simulado.
-        Se unen nombre y apellido para guardarlo en la clave 'nombre'.
-        """
-        telefono = self.telefono_var.get().strip()
-        nombre = self.nombre_var.get().strip()
-        apellido = self.apellido_var.get().strip()
-        direccion = self.direccion_var.get().strip()
-        rfc = self.rfc_var.get().strip().upper()
-        
-        # Validaciones básicas
-        if len(telefono) != 10 or not telefono.isdigit():
-            messagebox.showwarning("Validación", "El teléfono debe tener 10 dígitos numéricos.")
-            return
-        if not nombre:
-            messagebox.showwarning("Validación", "El nombre es obligatorio.")
-            return
-        if len(rfc) != 13:
-            messagebox.showwarning("Validación", "El RFC debe tener 13 caracteres.")
-            return
-        
-        nombreCompleto = f"{nombre} {apellido}".strip()
-        # Verificamos si el cliente ya existe (por teléfono)
-        existe = False
-        for cliente in self.clientes:
-            if cliente["telefono"] == telefono:
-                # Actualizar
-                cliente["nombre"] = nombreCompleto
-                cliente["direccion"] = direccion
-                cliente["rfc"] = rfc
-                existe = True
-                messagebox.showinfo("Éxito", "Cliente actualizado correctamente.")
-                break
-        if not existe:
-            # Insertar nuevo
-            self.clientes.append({
-                "telefono": telefono,
-                "nombre": nombreCompleto,
-                "direccion": direccion,
-                "rfc": rfc
-            })
-            messagebox.showinfo("Éxito", "Cliente insertado correctamente.")
-        self.limpiar_formulario()
-        self.cargar_lista_clientes()
-    
-    def eliminar_cliente(self):
-        """Elimina el cliente cuyo teléfono se muestra en el formulario de la sección derecha."""
-        telefono = self.telefono_var.get().strip()
-        if not telefono:
-            messagebox.showwarning("Validación", "No hay teléfono para eliminar.")
-            return
-        if not messagebox.askyesno("Confirmar", f"¿Eliminar al cliente con teléfono {telefono}?"):
-            return
-        eliminado = False
-        for i, cliente in enumerate(self.clientes):
-            if cliente["telefono"] == telefono:
-                del self.clientes[i]
-                eliminado = True
-                messagebox.showinfo("Éxito", "Cliente eliminado correctamente.")
-                break
-        if not eliminado:
-            messagebox.showerror("Error", "No se encontró el cliente para eliminar.")
-        self.limpiar_formulario()
-        self.cargar_lista_clientes()
-    
-    def cargar_datos_cliente(self, telefono):
-        """Carga los datos completos de un cliente en el formulario de la sección derecha."""
-        for cliente in self.clientes:
-            if cliente["telefono"] == telefono:
-                nombreCompleto = cliente["nombre"].strip()
-                partes = nombreCompleto.split(" ", 1)
-                if len(partes) == 2:
-                    nombre, apellido = partes
-                else:
-                    nombre = partes[0]
-                    apellido = ""
-                self.telefono_var.set(cliente["telefono"])
-                self.nombre_var.set(nombre)
-                self.apellido_var.set(apellido)
-                self.direccion_var.set(cliente["direccion"])
-                self.rfc_var.set(cliente["rfc"].upper())
-                break
-    
-    def limpiar_formulario(self):
-        """Limpia todos los campos del formulario de la sección derecha."""
+        self.load_clients()
+
+    def on_select_client(self, event):
+        sel = self.tree.focus(); vals = self.tree.item(sel,'values')
+        if not vals: return
+        tel = vals[0]
+        self.cursor.execute("SELECT nombre, direccion, rfc FROM Cliente WHERE telefono=%s",(tel,))
+        rec = self.cursor.fetchone()
+        if rec:
+            nm, dirc, rfc = rec
+            self.telefono_var.set(str(tel))
+            self.nombre_var.set(nm)
+            if dirc or rfc:
+                self.advanced_var.set(True)
+                self.toggle_advanced()
+                self.direccion_var.set(dirc)
+                self.rfc_var.set(rfc)
+            else:
+                self.advanced_var.set(False)
+                self.toggle_advanced()
+
+    def new_client(self):
         self.telefono_var.set("")
         self.nombre_var.set("")
-        self.apellido_var.set("")
         self.direccion_var.set("")
         self.rfc_var.set("")
+        self.advanced_var.set(False)
+        self.toggle_advanced()
 
-# Para probar de forma independiente:
+    def save_client(self):
+        tel = self.telefono_var.get().strip()
+        nm  = self.nombre_var.get().strip()
+        dirc= self.direccion_var.get().strip() if self.advanced_var.get() else ''
+        rfc = self.rfc_var.get().strip().upper() if self.advanced_var.get() else ''
+        # Validaciones
+        if not tel.isdigit() or len(tel)!=10:
+            messagebox.showwarning("Validación","Teléfono inválido."); return
+        if not nm:
+            messagebox.showwarning("Validación","Nombre obligatorio."); return
+        if self.advanced_var.get() and len(rfc)!=13:
+            messagebox.showwarning("Validación","RFC debe tener 13 caracteres."); return
+        # Insert/update
+        self.cursor.execute("SELECT 1 FROM Cliente WHERE telefono=%s",(tel,))
+        if self.cursor.fetchone():
+            sql = "UPDATE Cliente SET nombre=%s, direccion=%s, rfc=%s WHERE telefono=%s"
+            params=(nm,dirc,rfc,tel); msg="Cliente actualizado correctamente."
+        else:
+            sql = "INSERT INTO Cliente (telefono,nombre,direccion,rfc) VALUES (%s,%s,%s,%s)"
+            params=(tel,nm,dirc,rfc); msg="Cliente insertado correctamente."
+        try:
+            self.cursor.execute(sql,params)
+            self.db.commit()
+            messagebox.showinfo("Éxito",msg)
+            self.new_client()
+            self.load_clients()
+        except Exception as e:
+            messagebox.showerror("Error al guardar",str(e))
+
+    def delete_client(self):
+        tel = self.telefono_var.get().strip()
+        if not tel:
+            messagebox.showwarning("Validación","Teléfono requerido."); return
+        if not messagebox.askyesno("Confirmar",f"Eliminar cliente {tel}? "): return
+        try:
+            self.cursor.execute("DELETE FROM Cliente WHERE telefono=%s",(tel,))
+            self.db.commit()
+            messagebox.showinfo("Éxito","Cliente eliminado correctamente.")
+            self.new_client()
+            self.load_clients()
+        except Exception as e:
+            messagebox.showerror("Error al eliminar",str(e))
+
+# Prueba independiente
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Clientes")
-    root.state("zoomed")
-    ClienteApp(root)
-    root.mainloop()
+    root=tk.Tk(); root.title("Clientes"); root.state("zoomed")
+    ClienteApp(root); root.mainloop()

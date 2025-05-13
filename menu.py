@@ -133,7 +133,7 @@ class PuntoDeVenta:
         self.frame_contenedor = tk.Frame(self.root, bg="white")
         self.frame_contenedor.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        self.frame_horario= tk.Frame(self.root,bg="black",height=55)
+        self.frame_horario= tk.Frame(self.root,bg="black",height=70)
         self.frame_horario.pack(side=tk.TOP, fill=tk.BOTH)
         
                 # Etiqueta para la fecha (alineada a la izquierda)
