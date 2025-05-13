@@ -4,10 +4,12 @@ Paso 2.Generar el entonrno virtual
 
 Paso 3.Habilitar el entorno virtual
 
+Paso 4. Instalar las librerias
 pip install Pillow
 pip install mysql-connector-python
 
-crear el .gitignore
-poner el env23270653\Scripts\activate
+Paso 5.Crear el .gitignore
 
-ejecutar con py contraeña.py
+Paso 6.Poner el env23270653\Scripts\activate
+
+Paso 7.Ejecutar con py contraeña.py
