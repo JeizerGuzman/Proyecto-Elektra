@@ -1,8 +1,8 @@
 -- ---------------------------------------------------------
 -- 1) Crear la base de datos y seleccionarla
 -- ---------------------------------------------------------
-CREATE DATABASE dbelektra;
-USE dbelektra;
+CREATE DATABASE db23270653;
+USE db23270653;
 
 -- ---------------------------------------------------------
 -- 2) Tabla: Categoria
@@ -204,6 +204,20 @@ INSERT INTO Proveedor (id_proveedor, nombre, telefono, representante) VALUES
     (10, 'Lamosa Hogar y Decoración',     '9611000015', 'Claudia Vargas');
 
 
-INSERT INTO Usuarios (id_usuario,nombre ,departamento ,salario ,telefono ,contraseña) VALUES
-    (1,'Administrador',"Administrador",10000,'9161579322','07');
+
+
+    -- ---------------------------------------------------------
+-- Extensión: Usuarios
+-- ---------------------------------------------------------
+INSERT INTO Usuarios (id_usuario, nombre, departamento, salario, telefono, contraseña) VALUES 
+(1, 'Administrador', 'Administrador', 10000, '9161579322', '07');
+
+
+    -- ---------------------------------------------------------
+-- Extensión: Clientes
+-- ---------------------------------------------------------
+INSERT INTO Cliente (telefono, nombre, direccion, rfc) VALUES 
+('5512345678', 'Comercial ABC', 'Calle 10 #123, Ciudad X', 'ABC123456XYZ'),
+('5523456789', 'Alimentos La Fuente', 'Av. Central #456, Ciudad Y', 'ALF456789DEF'),
+('5534567890', 'Servicios Integrales', 'Boulevard Norte #789, Ciudad Z', 'SER789012GHI');
 
