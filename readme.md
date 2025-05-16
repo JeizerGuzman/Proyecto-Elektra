@@ -3,8 +3,9 @@ Paso 1. Crear la base de datos.
 Paso 2. Crear el entorno virtual ejecutando el siguiente comando: 
 python -m venv env23270653
 
-Paso 7. Para activar el entorno virtual en futuras sesiones, ejecutar: 
+Paso 3. Para activar el entorno virtual en futuras sesiones, ejecutar: 
 env23270653\Scripts\activate
+
 
 
 Paso 4. Instalar las librerías necesarias ejecutando los siguientes comandos:
