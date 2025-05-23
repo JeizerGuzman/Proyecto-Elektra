@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ventas import ventana_venta  # Importa la función de ventas
+from ventas import VentaApp  # Importa la función de ventas
 from clientes import ClienteApp  # Importa la clase de clientes
 from PIL import Image, ImageTk
 from contraseña import VentanaLogin
@@ -8,7 +8,7 @@ from proveedores import ProveedorApp
 from configuracion import ConfiguracionesApp
 from datetime import datetime
 import locale
-
+from inventario import InventarioApp
 
 
 
@@ -37,9 +37,7 @@ class PuntoDeVenta:
                  font=("Helvetica", 20), bg="white").pack(pady=50)
 
     def on_inventario(self):
-        self._limpiar_contenedor()
-        tk.Label(self.frame_contenedor, text="Aquí irá el inventario",
-                 font=("Helvetica", 20), bg="white").pack(pady=50)
+        InventarioApp(self.frame_contenedor)
 
     def on_proveedores(self):
         self._limpiar_contenedor()
@@ -53,7 +51,7 @@ class PuntoDeVenta:
 
     def on_venta(self):
         self._limpiar_contenedor()
-        ventana_venta(self.frame_contenedor)
+        VentaApp(self.frame_contenedor)
 
     def on_clientes(self):
         self._limpiar_contenedor()

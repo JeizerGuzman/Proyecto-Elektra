@@ -217,7 +217,7 @@ INSERT INTO Usuarios (id_usuario, nombre, departamento, salario, telefono, contr
 -- Extensión: Clientes
 -- ---------------------------------------------------------
 INSERT INTO Cliente (telefono, nombre, direccion, rfc) VALUES 
-('5512345678', 'Comercial ABC', 'Calle 10 #123, Ciudad X', 'ABC123456XYZ'),
-('5523456789', 'Alimentos La Fuente', 'Av. Central #456, Ciudad Y', 'ALF456789DEF'),
-('5534567890', 'Servicios Integrales', 'Boulevard Norte #789, Ciudad Z', 'SER789012GHI');
+('5512345678', 'Rodrigo Gonzalez', 'Calle 10 #123, Ciudad X', 'ABC123456XYZ'),
+('5523456789', 'Alejandro Gutierrez', 'Av. Central #456, Ciudad Y', 'ALF456789DEF'),
+('5534567890', 'Kaleb Gopar', 'Boulevard Norte #789, Ciudad Z', 'SER789012GHI');
 
