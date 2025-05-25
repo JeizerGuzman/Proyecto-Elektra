@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # tu módulo de conexión
+from botones import configurar_estilos
 
 class HistorialApp:
     """
@@ -12,6 +13,7 @@ class HistorialApp:
         self.db = conexion.conectar()
         self.cursor = self.db.cursor()
         self._render_ui()
+        configurar_estilos(self.container)
 
     def _clear(self):
         for w in self.container.winfo_children():
@@ -22,9 +24,17 @@ class HistorialApp:
         self.container.configure(bg="white")
 
         # Encabezado
-        header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        header = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         header.pack(fill=tk.X)
-        tk.Label(header, text="HISTORIAL DE VENTAS", font=("Helvetica",14,"bold"), bg="#ECECEC").pack(side=tk.LEFT)
+        tk.Label(header, text="HISTORIAL DE VENTAS", font=("Tahoma",14,"bold"),fg="white", bg="#8FC9DB").pack(side=tk.LEFT)
+
+        # Panel búsqueda
+        search_frame = tk.Frame(self.container, bg="white")
+        search_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(search_frame, text="Buscar por ID Venta:", bg="white",font=("tahoma",10)).pack(side=tk.LEFT)
+        self.entry_buscar = ttk.Entry(search_frame, width=20)
+        self.entry_buscar.pack(side=tk.LEFT, padx=5)
+        self.entry_buscar.bind("<KeyRelease>", self.buscar_ventas)
 
         # Split: Ventas (izq) y Detalles (der)
         main = tk.Frame(self.container, bg="white")
@@ -50,9 +60,7 @@ class HistorialApp:
         self.tree_v.configure(yscrollcommand=sb_v.set)
         self.tree_v.bind("<<TreeviewSelect>>", self.on_select_venta)
 
-        # Botón para cancelar venta
-        btn_cancel = tk.Button(left, text="Cancelar Venta", bg="#dc3545", fg="white",
-                               font=("Helvetica",10,"bold"), command=self.cancelar_venta)
+        btn_cancel = ttk.Button(left, text="Cancelar Venta", style="Peligro.TButton", command=self.cancelar_venta)
         btn_cancel.pack(pady=5)
 
         # Panel de DetalleVenta
@@ -72,26 +80,33 @@ class HistorialApp:
         sb_d.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_d.configure(yscrollcommand=sb_d.set)
 
-        # Cargar ventas
         self.load_ventas()
 
-    def load_ventas(self):
-        # Limpia y consulta con JOIN para mostrar nombre de usuario
+    def load_ventas(self, filtro=None):
         self.tree_v.delete(*self.tree_v.get_children())
-        sql = ("SELECT v.id_venta, v.fecha, v.importe, v.telefono, u.nombre "
-               "FROM Venta v "
-               "LEFT JOIN Usuarios u ON v.id_usuario = u.id_usuario "
-               "ORDER BY v.fecha DESC")
+        sql = (
+            "SELECT v.id_venta, v.fecha, v.importe, v.telefono, u.nombre "
+            "FROM Venta v "
+            "LEFT JOIN Usuarios u ON v.id_usuario = u.id_usuario "
+        )
+        params = []
+        if filtro:
+            sql += "WHERE CAST(v.id_venta AS CHAR) LIKE %s "
+            params = [f"%{filtro}%"]
+        sql += "ORDER BY v.id_venta DESC"  # Ordena por más reciente primero
         try:
-            self.cursor.execute(sql)
+            self.cursor.execute(sql, params)
             for row in self.cursor.fetchall():
-                # row = (id_venta, fecha, importe, telefono, nombre_usuario)
                 id_venta, fecha, importe, telefono, usuario = row
                 self.tree_v.insert("", tk.END, values=(
                     id_venta, fecha, f"${importe:.2f}", telefono, usuario or "Desconocido"
                 ))
         except Exception as e:
             messagebox.showerror("Error BD", f"No se pudo cargar ventas: {e}")
+
+    def buscar_ventas(self, event):
+        texto = self.entry_buscar.get().strip()
+        self.load_ventas(filtro=texto if texto else None)
 
     def on_select_venta(self, event):
         sel = self.tree_v.selection()
@@ -102,8 +117,10 @@ class HistorialApp:
 
     def load_detalle(self, id_venta):
         self.tree_d.delete(*self.tree_d.get_children())
-        sql = ("SELECT codigo, cantidad, precio "
-               "FROM DetalleVenta WHERE id_venta = %s")
+        sql = (
+            "SELECT codigo, cantidad, precio "
+            "FROM DetalleVenta WHERE id_venta = %s"
+        )
         try:
             self.cursor.execute(sql, (id_venta,))
             for codigo, cantidad, precio in self.cursor.fetchall():
@@ -117,10 +134,9 @@ class HistorialApp:
             messagebox.showwarning("Validación", "Seleccione una venta para cancelar.")
             return
         id_venta = self.tree_v.item(sel[0], 'values')[0]
-        if not messagebox.askyesno("Confirmar", f"¿Eliminar la venta {id_venta}?"):
+        if not messagebox.askyesno("Confirmar", f"¿Eliminar la venta {id_venta}?" ):
             return
         try:
-            # Borrar detalle y venta
             self.cursor.execute("DELETE FROM DetalleVenta WHERE id_venta = %s", (id_venta,))
             self.cursor.execute("DELETE FROM Venta WHERE id_venta = %s", (id_venta,))
             self.db.commit()
@@ -130,15 +146,3 @@ class HistorialApp:
         except Exception as e:
             self.db.rollback()
             messagebox.showerror("Error BD", f"No se pudo cancelar venta: {e}")
-
-# Ejemplo de uso desde tu módulo de reportes:
-#
-# from historial import HistorialApp
-#
-# class ReportesApp:
-#     def on_historial(self):
-#         self._clear()
-#         HistorialApp(self.content)
-#
-# Y en la sección de navegación:
-# tk.Button(nav, text="Historial", command=self.on_historial).pack(...)

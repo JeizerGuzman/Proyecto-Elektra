@@ -106,6 +106,7 @@ def crear_boton(padre, texto, color_nombre, comando=None):
         command=comando
     )
 
+
 # Demo para visualizar todos los botones (mejorada para mostrar más botones)
 def _demo_botones():
     raiz = tk.Tk()

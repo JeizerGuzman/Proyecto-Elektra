@@ -45,9 +45,9 @@ class VentaApp:
         self.container.configure(bg="white")
 
         # Título
-        title = tk.Frame(self.container, bg="#F0F0F0", height=40, padx=10, pady=5)
+        title = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         title.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(title, text="VENTAS", font=("Helvetica",16,"bold"), bg="#F0F0F0").pack(side=tk.LEFT)
+        tk.Label(title, text="VENTAS", font=("Tahoma",14,"bold"),fg="white", bg="#8FC9DB").pack(side=tk.LEFT)
 
         # Botón Agregar Artículo
         sf = tk.Frame(self.container, bg="white", padx=10, pady=5)
@@ -66,26 +66,71 @@ class VentaApp:
         ttk.Scrollbar(tf, command=self.tree.yview).pack(side=tk.LEFT, fill=tk.Y)
         self.tree.configure(yscrollcommand=lambda f,s: None)
 
-        # Área inferior: cliente, botones y totales
-        bf = tk.Frame(self.container, bg="#ECECEC", height=60, padx=10, pady=5)
+        # Configuración del estilo (hazlo una vez al inicio de tu aplicación)
+        style = ttk.Style()
+        style.theme_use('clam')  # Necesario para personalización
+
+        # Estilo personalizado para el Combobox
+        style.configure('Modern.TCombobox',
+                        font=('Segoe UI', 10),
+                        foreground='#2C3E50',  # Color texto
+                        background='#FFFFFF',   # Color fondo
+                        bordercolor='#BDC3C7', # Color borde
+                        lightcolor='#BDC3C7',
+                        darkcolor='#BDC3C7',
+                        arrowsize=12,          # Tamaño flecha desplegable
+                        padding=(8, 4),        # Padding interno
+                        relief='flat')         # Estilo del borde
+
+        style.map('Modern.TCombobox',
+                fieldbackground=[('readonly', '#FFFFFF')],
+                selectbackground=[('readonly', '#E8F4F8')],  # Color selección
+                selectforeground=[('readonly', '#2C3E50')],
+                bordercolor=[('focus', '#3498DB')],  # Color borde al enfocar
+                arrowsize=[('pressed', 10), ('!pressed', 12)])
+
+        # Área inferior mejorada
+        bf = tk.Frame(self.container, bg="#F8F9FA", height=70, padx=15, pady=10)  # Fondo más claro
         bf.pack(side=tk.BOTTOM, fill=tk.X)
-        tk.Label(bf, text="Cliente:", bg="#ECECEC").pack(side=tk.LEFT)
-        self.client_cb = ttk.Combobox(bf, state="readonly", width=25)
+
+        # Etiqueta con mejor tipografía
+        tk.Label(bf, 
+                text="CLIENTE:", 
+                bg="#F8F9FA",
+                font=('Arial black', 12, 'bold'),
+                fg="#000000").pack(side=tk.LEFT, padx=(0, 10))
+
+        # Combobox mejorado
+        self.client_cb = ttk.Combobox(
+            bf, 
+            state="readonly", 
+            width=28,
+            height=10,  # Altura del dropdown
+            style='Modern.TCombobox',
+            font=('Tahoma', 10)
+        )
         self.load_clients()
         self.client_cb.pack(side=tk.LEFT, padx=5)
+
+        # Añadir ícono opcional (requiere tener la imagen)
+        try:
+            client_icon = tk.PhotoImage(file='client_icon.png').subsample(20, 20)
+            tk.Label(bf, image=client_icon, bg="#F8F9FA").pack(side=tk.LEFT, padx=(10, 0))
+        except:
+            pass  # Si no hay ícono, continuar sin él
 
         # Eliminar y vaciar
         ttk.Button(sf, text="Eliminar Articulo", style="Advertencia.TButton", command=self.del_producto).pack(side=tk.LEFT, padx=15)
         ttk.Button(bf, text="Vaciar Ticket", style="Peligro.TButton", command=self.clear_ticket).pack(side=tk.LEFT, padx=5)
 
         # Subtotal y Total
-        totals_frame = tk.Frame(bf, bg="#ECECEC")
+        totals_frame = tk.Frame(bf, bg="#FFFFFF")
         totals_frame.pack(side=tk.RIGHT)
         self.lbl_sub = tk.Label(totals_frame, text="Subtotal: $0.00",
-                                font=("Helvetica",12,"bold"), bg="#ECECEC")
+                                font=("Tahoma",12,"bold"), bg="#FFFFFF")
         #self.lbl_sub.pack()
         self.lbl_tot = tk.Label(totals_frame, text="Total: $0.00",
-                                font=("Helvetica",14,"bold"), bg="#ECECEC")
+                                font=("Tahoma",14,"bold"), bg="#FFFFFF")
         self.lbl_tot.pack()
         # Botón Cobrar
         ttk.Button(totals_frame, text="Cobrar",style="Exito.TButton", width=10,
@@ -105,6 +150,8 @@ class VentaApp:
         # Seleccionar por defecto el cliente 'Venta General (0000000000)'
         default = next((opt for opt in opts if opt.startswith('Venta General')), opts[0])
         self.client_cb.current(opts.index(default))
+        self.client_cb.set(default)
+        
 
     def show_selector_ui(self):
         self._limpiar_contenedor()
@@ -125,13 +172,22 @@ class VentaApp:
         top = tk.Toplevel(self.container)
         top.title('Método de Pago')
         # Prepara datos
-        cliente_disp = self.client_cb.get()
-        cliente_tel = self.client_map.get(cliente_disp)
+# Asegura que el valor actual es el que está en pantalla, incluso si se redibujó
+        try:
+            cliente_disp = self.client_cb.get()
+            cliente_tel = self.client_map.get(cliente_disp, '0000000000')  # valor por defecto si no está
+            cliente_nombre = cliente_disp.split(' (')[0]
+        except Exception:
+            cliente_disp = "Venta General (0000000000)"
+            cliente_tel = "0000000000"
+            cliente_nombre = "Venta General"
+            
         total = sum(info[1] * info[2] for info in self.items.values())
         productos = [ {'codigo':c, 'precio':info[1], 'cantidad':info[2]} for c,info in self.items.items() ]
         venta_data = {
             'usuario_id': self.usuario_id,
             'cliente_telefono': cliente_tel,
+            'cliente_nombre': cliente_nombre,
             'total': total,
             'productos': productos
         }

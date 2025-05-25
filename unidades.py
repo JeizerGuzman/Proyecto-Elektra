@@ -37,7 +37,7 @@ class UnidadApp:
         sf = tk.Frame(left, bg="white", padx=10, pady=10)
         sf.pack(fill=tk.X)
         tk.Label(sf, text="Buscar ID Unidad:", bg="white").pack(side=tk.LEFT)
-        tk.Entry(sf, textvariable=self.buscar_var, width=10).pack(side=tk.LEFT, padx=5)
+        ttk.Entry(sf, textvariable=self.buscar_var, width=10,font=("tahoma",11),style='Modern.TEntry').pack(side=tk.LEFT, padx=5)
         ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6, command=self.buscar_unidad).pack(side=tk.LEFT)
 
         self.tree = ttk.Treeview(left, columns=("id","nombre"), show="headings", height=15)
@@ -66,9 +66,9 @@ class UnidadApp:
         ff = tk.Frame(right, bg="white", padx=10, pady=10)
         ff.pack(fill=tk.BOTH, expand=True)
         tk.Label(ff, text="ID Unidad:", bg="white").grid(row=0, column=0, sticky=tk.E, pady=5, padx=5)
-        tk.Entry(ff, textvariable=self.id_var, width=20).grid(row=0, column=1, pady=5, padx=5)
+        ttk.Entry(ff, textvariable=self.id_var, width=20,font=("tahoma",11),style='Modern.TEntry').grid(row=0, column=1, pady=5, padx=5)
         tk.Label(ff, text="Nombre:", bg="white").grid(row=1, column=0, sticky=tk.E, pady=5, padx=5)
-        tk.Entry(ff, textvariable=self.nombre_var, width=20).grid(row=1, column=1, pady=5, padx=5)
+        ttk.Entry(ff, textvariable=self.nombre_var, width=20,font=("tahoma",11),style='Modern.TEntry').grid(row=1, column=1, pady=5, padx=5)
 
     def cargar_lista_unidades(self, filtro=""):
         self.tree.delete(*self.tree.get_children())

@@ -25,9 +25,9 @@ class ProveedorApp:
         # -------------------------------------------
         # Título "PROVEEDORES"
         # -------------------------------------------
-        title_frame = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        title_frame = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         title_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(title_frame, text="PROVEEDORES", font=("Helvetica", 14, "bold"), bg="#ECECEC")\
+        tk.Label(title_frame, text="PROVEEDORES", font=("Tahoma", 14, "bold"), fg="white",bg="#8FC9DB")\
             .pack(side=tk.LEFT)
         
         # -------------------------------------------
@@ -43,11 +43,16 @@ class ProveedorApp:
         # 1) Barra de búsqueda (por ID de proveedor)
         search_frame = tk.Frame(left_frame, bg="white", padx=10, pady=10)
         search_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(search_frame, text="Buscar ID Proveedor:", font=("Helvetica", 10), bg="white")\
+        tk.Label(search_frame, text="Buscar ID Proveedor:", font=("Tahoma", 10), bg="white")\
             .pack(side=tk.LEFT)
         self.buscar_var = tk.StringVar()
-        tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))\
-            .pack(side=tk.LEFT, padx=5)
+        ttk.Entry(search_frame,
+                textvariable=self.buscar_var,
+                width=10,
+                font=("Tahoma", 11),
+                style='Modern.TEntry')\
+            .pack(side=tk.LEFT, padx=5, pady=2)
+            
         ttk.Button(search_frame, text="Buscar",style="Gris.TButton",width=6,
                   command=self.buscar_proveedor).pack(side=tk.LEFT, padx=5)
         
@@ -94,13 +99,21 @@ class ProveedorApp:
             ("Representante:", self.representante_var, 3),
         ]
         for text, var, row in labels:
-            tk.Label(form_right_frame, text=text, font=("Helvetica", 10), bg="white")\
+            tk.Label(form_right_frame, text=text, font=("Tahoma", 10), bg="white")\
                 .grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-            tk.Entry(form_right_frame, textvariable=var, width=25, font=("Helvetica", 10))\
-                .grid(row=row, column=1, padx=5, pady=5)
+            
+            entry = ttk.Entry(form_right_frame,
+                            textvariable=var,
+                            width=25,
+                            font=("Tahoma", 11),
+                            style='Modern.TEntry')
+            entry.grid(row=row, column=1, padx=5, pady=5)
         
         # Carga inicial de proveedores
         self.cargar_lista_proveedores()
+    
+    
+    
     
     # --------------------------------------------------
     # Funciones para la sección IZQUIERDA

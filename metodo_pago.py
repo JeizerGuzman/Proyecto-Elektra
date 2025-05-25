@@ -49,46 +49,86 @@ class MetodoPagoApp:
         # Maximizar ventana
         try: self.parent.state('zoomed')
         except: pass
-        self.parent.configure(bg="#F0F0F0")
-
-        # Estilos ttk
-        style = ttk.Style(self.parent)
-        style.configure("Success.TButton", font=(None,12), padding=10)
-        style.map("Success.TButton", background=[('!disabled','#28a745'),('active','#218838')])
-        style.configure("Danger.TButton", font=(None,12), padding=10)
-        style.map("Danger.TButton", background=[('!disabled','#dc3545'),('active','#c82333')])
+        self.parent.configure(bg="#FFFFFF")
 
         # Header
-        header = ttk.Frame(self.parent)
+        header = tk.Frame(self.parent,bg="#FFFFFF")
         header.pack(fill=tk.X)
-        ttk.Label(header, text="MÉTODO DE PAGO", font=(None,18,'bold'), background="#004aad", foreground="white").pack(side=tk.LEFT, fill=tk.X, expand=True, pady=10)
-        ttk.Label(header, text=f"Folio: {self.folio}", font=(None,12,'bold'), background="#004aad", foreground="white").pack(side=tk.RIGHT, padx=20)
+        ttk.Label(header, text="MÉTODO DE PAGO", font=("Tahoma",18,'bold'), background="#004aad", foreground="white").pack(side=tk.LEFT, fill=tk.X, expand=True, pady=10)
+        ttk.Label(header, text=f"Folio: {self.folio}", font=("Tahoma",18,'bold'), background="#004aad", foreground="white").pack(side=tk.RIGHT, padx=20)
 
         # Total
-        ttk.Label(self.parent, text=f"Total a pagar: $ {self.total:.2f}", font=(None,24,'bold'), foreground="#004aad").pack(pady=20)
+        ttk.Label(self.parent, text=f"Total a pagar: $ {self.total:.2f}", font=("Tahoma",24,'bold'), foreground="#004aad",background="#FFFFFF").pack(pady=20)
 
-        # Método de pago (solo efectivo habilitado)
-        met_frame = ttk.LabelFrame(self.parent, text="Método de Pago", padding=10)
-        met_frame.pack(fill=tk.X, padx=20, pady=10)
-        ttk.Radiobutton(met_frame, text="Efectivo", variable=self.pay_method, value="Efectivo").pack(anchor=tk.W)
+
+        # Configura el estilo primero (hazlo una vez al inicio de tu aplicación)
+        style = ttk.Style()
+        style.theme_use('clam')  # Necesario para personalización avanzada
+
+        # Configuración específica para el LabelFrame y RadioButtons
+        style.configure('Payment.TLabelframe', 
+                    font=('Tahoma', 22, 'bold'),
+                    borderwidth=2,
+                    relief='groove',
+                    foreground="#000000",  # Color texto
+                    background="#FFFFFF")  # Color fondo
+
+        style.configure('Payment.TRadiobutton',
+                    font=('Tahoma', 10),
+                    foreground="#000000",
+                    padding=(5, 2),
+                    background="#FFFFFF")
+
+        style.map('Payment.TRadiobutton',
+                foreground=[('disabled', '#95A5A6')])  # Color para opciones deshabilitadas
+
+        # Creación del frame con el nuevo estilo
+        met_frame = ttk.LabelFrame(
+            self.parent, 
+            text="MÉTODO DE PAGO",  # Texto en mayúsculas para mejor jerarquía
+            style='Payment.TLabelframe',
+            padding=(15, 10, 15, 10)  # Padding: (left, top, right, bottom)
+        )
+        met_frame.pack(fill=tk.X, padx=20, pady=10, ipady=5)  # ipady agrega padding interno vertical
+
+        # RadioButtons con estilo mejorado
+        ttk.Radiobutton(
+            met_frame, 
+            text="EFECTIVO", 
+            variable=self.pay_method, 
+            value="Efectivo",
+            style='Payment.TRadiobutton'
+        ).pack(anchor=tk.W, pady=3)  # Pequeño espacio entre opciones
+        
+        
         for m in ["Tarjeta", "Transferencia", "MercadoPago"]:
-            ttk.Radiobutton(met_frame, text=m, variable=self.pay_method, value=m, state=tk.DISABLED).pack(anchor=tk.W)
+            ttk.Radiobutton(
+                met_frame, 
+                text=m.upper(),  # Texto en mayúsculas
+                variable=self.pay_method, 
+                value=m, 
+                state=tk.DISABLED,
+                style='Payment.TRadiobutton'
+            ).pack(anchor=tk.W, pady=3)
 
         # Monto recibido y cambio
-        amt_frame = ttk.Frame(self.parent)
+        amt_frame = tk.Frame(self.parent,bg="#FFFFFF")
         amt_frame.pack(fill=tk.X, padx=20, pady=10)
-        ttk.Label(amt_frame, text="Monto recibido:").pack(side=tk.LEFT)
-        ttk.Entry(amt_frame, textvariable=self.received_var, width=10).pack(side=tk.LEFT, padx=5)
-        ttk.Label(amt_frame, text="Cambio:").pack(side=tk.LEFT, padx=(20,5))
-        ttk.Label(amt_frame, textvariable=self.change_var, font=(None,12,'bold')).pack(side=tk.LEFT)
+        ttk.Label(amt_frame, text="Monto recibido:",background="#FFFFFF",font=("Tahoma",12,'bold')).pack(side=tk.LEFT)
+        ttk.Entry(amt_frame, textvariable=self.received_var, width=10,font=("Tahoma",12)).pack(side=tk.LEFT, padx=5)
+        ttk.Label(amt_frame, text="Cambio:",background="#FFFFFF").pack(side=tk.LEFT, padx=(20,5))
+        ttk.Label(amt_frame, textvariable=self.change_var, font=("Tahoma",12,'bold'),background="#FFFFFF").pack(side=tk.LEFT)
         self.received_var.trace_add('write', lambda *args: self._calcular_cambio())
 
         # Botones de acción
-        btn_frame = ttk.Frame(self.parent)
+        btn_frame = tk.Frame(self.parent,bg="#FFFFFF")
         btn_frame.pack(fill=tk.X, padx=20, pady=20)
-        ttk.Button(btn_frame, text="Cobrar e Imprimir", command=lambda: self._procesar_pago(imprimir=True), style="Turquesa.TButton",width=25).pack(side=tk.LEFT, padx=10)
-        ttk.Button(btn_frame, text="Cobrar sin imprimir", command=lambda: self._procesar_pago(imprimir=False), style="Naranja.TButton",width=25).pack(side=tk.LEFT, padx=10)
-        ttk.Button(btn_frame, text="Cancelar", command=self._cancelar, style="Peligro.TButton",width=10).pack(side=tk.RIGHT, padx=15)
+        ttk.Button(btn_frame, text="Cobrar e Imprimir", command=lambda: self._procesar_pago(imprimir=True), 
+                   style="Turquesa.TButton",width=25).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn_frame, text="Cobrar sin imprimir", command=lambda: self._procesar_pago(imprimir=False), 
+                   style="Naranja.TButton",width=25).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn_frame, text="Cancelar", command=self._cancelar, 
+                   style="Peligro.TButton",width=10).pack(side=tk.RIGHT, padx=15)
 
     def _calcular_cambio(self):
         try:
@@ -112,30 +152,72 @@ class MetodoPagoApp:
         self.db.commit()
 
     def _generar_ticket_png(self):
+        from PIL import ImageFont, ImageDraw, Image
+        import os
+        from datetime import date
+
         folder = 'FOLDER_TICKETS'
         os.makedirs(folder, exist_ok=True)
         path = os.path.join(folder, f"ticket_{self.folio}.png")
-        img = Image.new('RGB', (600, 800), 'white')
+
+        width, height = 600, 800
+        img = Image.new('RGB', (width, height), 'white')
         draw = ImageDraw.Draw(img)
-        font = ImageFont.load_default()
+
+        try:
+            font_title = ImageFont.truetype("arial.ttf", 32)
+            font_subtitle = ImageFont.truetype("arial.ttf", 18)
+            font_text = ImageFont.truetype("arial.ttf", 14)
+            font_bold = ImageFont.truetype("arialbd.ttf", 16)
+        except:
+            font_title = font_subtitle = font_text = font_bold = ImageFont.load_default()
+
+        telefono = self.venta_data.get('cliente_telefono', 'Venta General')
+
         y = 20
-        draw.text((20,y), f"Ticket Folio: {self.folio}", font=font, fill='black')
+        draw.text((width//2 - 40, y), "Elektra", font=font_title, fill='black')
+        y += 40
+        draw.text((20, y), f"Folio: {self.folio}", font=font_text, fill='black')
+        draw.text((400, y), f"Fecha: {date.today()}", font=font_text, fill='black')
+        y += 25
+        draw.text((20, y), f"Cliente: {telefono}", font=font_text, fill='black')
+        y += 25
+        draw.text((20, y), f"Atendido por: {self.usuario}", font=font_text, fill='black')
         y += 30
-        draw.text((20,y), f"Fecha: {date.today()}", font=font, fill='black')
-        y += 20
-        draw.text((20,y), f"Atendido por: {self.usuario}", font=font, fill='black')
-        y += 20
-        draw.text((20,y), f"Cliente: {self.venta_data.get('cliente_telefono','Venta General')}", font=font, fill='black')
-        y += 30
-        headers = [("Código",20), ("Cant",200), ("Precio",300)]
-        for h, x in headers: draw.text((x,y), h, font=font, fill='black')
-        y += 20
-        for p in self.venta_data.get('productos',[]):
-            draw.text((20,y), p['codigo'], font=font, fill='black')
-            draw.text((200,y), str(p['cantidad']), font=font, fill='black')
-            draw.text((300,y), f"{p['precio']:.2f}", font=font, fill='black')
-            y += 20
+
+        draw.line([(20, y), (580, y)], fill='black', width=1)
+        y += 10
+
+        draw.text((20, y), "Código", font=font_bold, fill='black')
+        draw.text((150, y), "Cantidad", font=font_bold, fill='black')
+        draw.text((250, y), "Precio", font=font_bold, fill='black')
+        draw.text((350, y), "Total", font=font_bold, fill='black')
+        y += 25
+
+        draw.line([(20, y), (580, y)], fill='black', width=1)
+        y += 10
+
+        for prod in self.venta_data.get('productos', []):
+            total_prod = prod['precio'] * prod['cantidad']
+            draw.text((20, y), prod['codigo'], font=font_text, fill='black')
+            draw.text((150, y), str(prod['cantidad']), font=font_text, fill='black')
+            draw.text((250, y), f"${prod['precio']:.2f}", font=font_text, fill='black')
+            draw.text((350, y), f"${total_prod:.2f}", font=font_text, fill='black')
+            y += 25
+
+        y += 10
+        draw.line([(20, y), (580, y)], fill='black', width=1)
+        y += 10
+
+        draw.text((250, y), "TOTAL:", font=font_bold, fill='black')
+        draw.text((350, y), f"${self.total:.2f}", font=font_bold, fill='black')
+
+        y += 40
+        draw.text((width//2 - 100, y), "¡Gracias por su compra!", font=font_subtitle, fill='black')
+
         img.save(path)
+
+
 
     def _procesar_pago(self, imprimir=False):
         try:

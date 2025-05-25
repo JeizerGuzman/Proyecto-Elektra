@@ -10,44 +10,54 @@ from botones import configurar_estilos
 
 class ConfiguracionesApp:
     def __init__(self, container):
-        self.container = container
-        for w in self.container.winfo_children(): 
-            w.destroy()
-        self.container.configure(bg="white")
-        configurar_estilos(self.container)
-        
-        
-        # Cabecera general
-        header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
-        header.pack(fill=tk.X)
-        tk.Label(header, text="CONFIGURACIONES", font=("Helvetica",14,"bold"),
-                 bg="#ECECEC").pack(side=tk.LEFT)
+            self.container = container
+            for w in self.container.winfo_children(): 
+                w.destroy()
+            self.container.configure(bg="white")
+            configurar_estilos(self.container)
+            
+            # Configurar peso de fila/columna para el contenedor principal
+            self.container.grid_rowconfigure(0, weight=1)
+            self.container.grid_columnconfigure(0, weight=1)
+            
+            # Cabecera general
+            header = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=4, pady=5)
+            header.pack(fill=tk.X)
+            header.pack_propagate(False)
+            tk.Label(header, text="CONFIGURACIONES", font=("Tahoma",14,"bold"),fg="white",
+                    bg="#8FC9DB").pack(side=tk.LEFT)
 
-        # Contenedor principal: nav + content
-        main = tk.Frame(self.container, bg="white")
-        main.pack(fill=tk.BOTH, expand=True)
+            # Contenedor principal: nav + content
+            main = tk.Frame(self.container, bg="white", height=500)
+            main.pack(fill=tk.BOTH, expand=True)
+            
+            # Configurar peso para el frame principal
+            main.grid_rowconfigure(1, weight=1)
+            main.grid_columnconfigure(0, weight=1)
 
-        # Barra de navegación
-        nav = tk.Frame(main, bg="#F0F0F0", height=40)
-        nav.pack(fill=tk.X)
-        ttk.Button(nav, text="Usuarios",  style="Morado.TButton", width=15,
-                  command=self.on_usuarios).pack(side=tk.LEFT, padx=5, pady=5)
-        ttk.Button(nav, text="Categorías", style="Morado.TButton", width=15,
-                  command=self.on_categorias).pack(side=tk.LEFT, padx=5, pady=5)
-        ttk.Button(nav, text="Unidades",   style="Morado.TButton", width=15,
-                  command=self.on_unidades).pack(side=tk.LEFT, padx=5, pady=5)
+            # Barra de navegación
+            nav = tk.Frame(main, bg="#F0F0F0", height=20)
+            nav.pack(fill=tk.X)
 
-        # Label dinámico de sección
-        self.section_title = tk.Label(main, text="", font=("Helvetica",12,"bold"),
-                                      bg="white", anchor="w", pady=5)
-        self.section_title.pack(fill=tk.X, padx=10)
+            # Label dinámico de sección
+            self.section_title = tk.Label(main, text="", font=("Tahoma",12,"bold"),
+                                        bg="white", anchor="w", pady=5)
+            self.section_title.pack(fill=tk.X, padx=4)
 
-        # Contenedor de vista
-        self.content = tk.Frame(main, bg="white")
-        self.content.pack(fill=tk.BOTH, expand=True)
+            # Contenedor de vista - AQUÍ ESTÁ EL CAMBIO PRINCIPAL
+            self.content = tk.Frame(main, bg="white")
+            self.content.pack(fill=tk.BOTH, expand=True, padx=4, pady=(0,4))  # Margen inferior
+            
+            # Botones de navegación DEBEN ir después de configurar el frame principal
+            ttk.Button(nav, text="Usuarios",  style="Morado.TButton", width=15,
+                    command=self.on_usuarios).pack(side=tk.LEFT, padx=5, pady=5)
+            ttk.Button(nav, text="Categorías", style="Morado.TButton", width=15,
+                    command=self.on_categorias).pack(side=tk.LEFT, padx=5, pady=5)
+            ttk.Button(nav, text="Unidades",   style="Morado.TButton", width=15,
+                    command=self.on_unidades).pack(side=tk.LEFT, padx=5, pady=5)
 
-        # Arranca en Usuarios
-        self.on_usuarios()
+            # Arranca en Usuarios
+            self.on_usuarios()
 
     def _clear(self):
         for w in self.content.winfo_children(): 
@@ -94,25 +104,25 @@ class UsuarioApp:
         # Izquierda: búsqueda + tabla
         left = tk.Frame(main, bg="white")
         left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        sf = tk.Frame(left, bg="white", padx=10, pady=10); sf.pack(fill=tk.X)
+        sf = tk.Frame(left, bg="white", padx=4, pady=10); sf.pack(fill=tk.X)
         tk.Label(sf, text="Buscar ID Usuario:", bg="white").pack(side=tk.LEFT)
-        tk.Entry(sf, textvariable=self.search_var, width=15).pack(side=tk.LEFT, padx=5)
+        ttk.Entry(sf, textvariable=self.search_var, width=15,font=("tahoma",11),style='Modern.TEntry').pack(side=tk.LEFT, padx=5)
         ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6,
                   command=self.load_users).pack(side=tk.LEFT)
 
         cols = ("id","dep","nom")
-        self.tree = ttk.Treeview(left, columns=cols, show="headings", height=20)
+        self.tree = ttk.Treeview(left, columns=cols, show="headings", height=10)
         for col, txt, w in [("id","ID Usuario",80),("dep","Departamento",120),("nom","Nombre",180)]:
             self.tree.heading(col, text=txt)
             self.tree.column(col, width=w, anchor="center")
-        self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.tree.pack(fill=tk.BOTH, expand=True, padx=4, pady=10)
         sb = ttk.Scrollbar(left, orient="vertical", command=self.tree.yview)
-        sb.pack(side=tk.LEFT, fill=tk.Y)
+        sb.pack(side=tk.LEFT, fill=tk.Y,pady=2)
         self.tree.configure(yscrollcommand=sb.set)
         self.tree.bind("<ButtonRelease-1>", self.select_user)
 
         # Derecha: formulario + botones
-        right = tk.Frame(main, bg="white", padx=10, pady=10)
+        right = tk.Frame(main, bg="white", padx=4, pady=10)
         right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         bf = tk.Frame(right, bg="white", pady=10); bf.pack(fill=tk.X)
         actions = [
@@ -124,19 +134,49 @@ class UsuarioApp:
             ttk.Button(bf, text=txt, style=f"{st}.TButton", width=15,
                       command=cmd).pack(side=tk.LEFT, padx=5)
 
-        form = tk.Frame(right, bg="white", padx=10, pady=10)
+        form = tk.Frame(right, bg="white", padx=4, pady=10)
         form.pack(fill=tk.BOTH, expand=True)
         labels = ["ID Usuario:", "Nombre:", "Departamento:", "Salario:", "Teléfono:", "Contraseña:"]
         for i, lbl in enumerate(labels):
             tk.Label(form, text=lbl, bg="white").grid(row=i, column=0, sticky=tk.E, padx=5, pady=5)
-        tk.Entry(form, textvariable=self.id_var, width=25).grid(row=0, column=1)
-        tk.Entry(form, textvariable=self.nom_var, width=25).grid(row=1, column=1)
-        ttk.Combobox(form, textvariable=self.dept_var,
-                     values=["Administrador","Gerencia","Ventas","Cajas","Servicio al Cliente","Bodega"],
-                     width=22).grid(row=2, column=1)
-        tk.Entry(form, textvariable=self.sal_var, width=25).grid(row=3, column=1)
-        tk.Entry(form, textvariable=self.tel_var, width=25).grid(row=4, column=1)
-        self.pwd_entry = tk.Entry(form, textvariable=self.pwd_var, show="*", width=25)
+        ttk.Entry(form, textvariable=self.id_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=0, column=1)
+        ttk.Entry(form, textvariable=self.nom_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=1, column=1)
+        
+        style = ttk.Style()
+        style.theme_use('clam')  # Necesario para personalización
+
+        # Estilo que replica el Combobox original pero mejorado
+        style.configure('Enhanced.TCombobox',
+                        font=('Tahoma', 11),
+                        foreground='#000000',
+                        background='#FFFFFF',
+                        bordercolor='#707070',
+                        arrowsize=14,
+                        padding=(6, 4),
+                        relief='solid',
+                        borderwidth=1)
+
+        style.map('Enhanced.TCombobox',
+                fieldbackground=[('readonly', '#FFFFFF')],
+                selectbackground=[('readonly', '#E1E1E1')],
+                selectforeground=[('readonly', '#000000')],
+                bordercolor=[('focus', '#0078D7')],
+                arrowsize=[('pressed', 12), ('!pressed', 14)])
+
+        departamentos=["Administrador","Gerencia","Ventas","Cajas","Servicio al Cliente","Bodega"]
+        self.cmb_usuario = ttk.Combobox(
+            form, 
+            values=departamentos,
+            textvariable=self.dept_var,
+            font=('Tahoma', 10),
+            width=25,
+            style='Enhanced.TCombobox',
+            state="readonly"  # Asegura que sea solo de selección
+        ).grid(row=2, column=1)
+        
+        ttk.Entry(form, textvariable=self.sal_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=3, column=1)
+        ttk.Entry(form, textvariable=self.tel_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=4, column=1)
+        self.pwd_entry = ttk.Entry(form, textvariable=self.pwd_var, show="*", width=25,font=("tahoma",11),style='Modern.TEntry')
         self.pwd_entry.grid(row=5, column=1)
         tk.Checkbutton(form, text="Mostrar", variable=tk.IntVar(),
                        command=self.toggle_pwd, bg="white").grid(row=5, column=2)

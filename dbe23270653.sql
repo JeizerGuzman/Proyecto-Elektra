@@ -1,11 +1,10 @@
--- ---------------------------------------------------------
--- 1) Crear la base de datos y seleccionarla
--- ---------------------------------------------------------
-CREATE DATABASE db23270653;
-USE db23270653;
+-- 1) Eliminar la base de datos si existe y crearla nuevamente
+DROP DATABASE IF EXISTS dbelektra;
+CREATE DATABASE dbelektra;
+USE dbelektra;
 
 -- ---------------------------------------------------------
--- 2) Tabla: Categoria
+-- 2) Tabla: Categoria (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Categoria (
     id_categoria INT PRIMARY KEY,
@@ -13,7 +12,7 @@ CREATE TABLE Categoria (
 );
 
 -- ---------------------------------------------------------
--- 3) Tabla: Unidad
+-- 3) Tabla: Unidad (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Unidad (
     id_unidad INT PRIMARY KEY,
@@ -21,17 +20,17 @@ CREATE TABLE Unidad (
 );
 
 -- ---------------------------------------------------------
--- 4) Tabla: Proveedor
+-- 4) Tabla: Proveedor (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Proveedor (
     id_proveedor INT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     telefono CHAR(10),
-    representante VARCHAR(50)   -- Se cambió 'contacto' por 'representante'
+    representante VARCHAR(50)
 );
 
 -- ---------------------------------------------------------
--- 5) Tabla: Cliente
+-- 5) Tabla: Cliente (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Cliente (
     telefono CHAR(10) PRIMARY KEY,
@@ -40,24 +39,23 @@ CREATE TABLE Cliente (
     rfc CHAR(13)
 );
 
-
 -- ---------------------------------------------------------
--- 11) Tabla: Usuarios (antes Empleado)
+-- 6) Tabla: Usuarios (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Usuarios (
-    id_usuario INT PRIMARY KEY,            -- Antes era id_empleado
+    id_usuario INT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     departamento VARCHAR(50),
     salario INT,
     telefono CHAR(10),
-    contraseña VARCHAR(20) NOT NULL       -- Nueva columna añadida
+    contraseña VARCHAR(20) NOT NULL
 );
 
 -- ---------------------------------------------------------
--- 6) Tabla: Articulo
+-- 7) Tabla: Articulo (MODIFICADA - código como VARCHAR)
 -- ---------------------------------------------------------
 CREATE TABLE Articulo (
-    codigo INT PRIMARY KEY,
+    codigo VARCHAR(13) PRIMARY KEY,  -- Cambiado de INT a VARCHAR(13)
     nombre VARCHAR(50) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     costo DECIMAL(10, 2) NOT NULL,
@@ -75,14 +73,14 @@ CREATE TABLE Articulo (
 );
 
 -- ---------------------------------------------------------
--- 7) Tabla: Venta
+-- 8) Tabla: Venta (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Venta (
     id_venta INT PRIMARY KEY,
     fecha DATE NOT NULL,
     importe DECIMAL(10, 2) NOT NULL,
     telefono CHAR(10) NOT NULL,
-    id_usuario INT NOT NULL,    -- Se cambió de id_empleado a id_usuario
+    id_usuario INT NOT NULL,
     CONSTRAINT fk_venta_cliente
         FOREIGN KEY (telefono) REFERENCES Cliente(telefono),
     CONSTRAINT fk_venta_usuario
@@ -90,11 +88,11 @@ CREATE TABLE Venta (
 );
 
 -- ---------------------------------------------------------
--- 8) Tabla: DetalleVenta
+-- 9) Tabla: DetalleVenta (MODIFICADA - código como VARCHAR)
 -- ---------------------------------------------------------
 CREATE TABLE DetalleVenta (
     id_venta INT,
-    codigo INT,
+    codigo VARCHAR(13) NOT NULL,  -- Cambiado de INT a VARCHAR(13)
     cantidad INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     PRIMARY KEY (id_venta, codigo),
@@ -105,7 +103,7 @@ CREATE TABLE DetalleVenta (
 );
 
 -- ---------------------------------------------------------
--- 9) Tabla: Compra
+-- 10) Tabla: Compra (sin cambios)
 -- ---------------------------------------------------------
 CREATE TABLE Compra (
     id_compra INT PRIMARY KEY,
@@ -114,7 +112,7 @@ CREATE TABLE Compra (
     fecha DATE NOT NULL,
     importe DECIMAL(10, 2) NOT NULL,
     id_proveedor INT NOT NULL,
-    id_usuario INT NOT NULL,    -- Se cambió de id_empleado a id_usuario
+    id_usuario INT NOT NULL,
     CONSTRAINT fk_compra_proveedor
         FOREIGN KEY (id_proveedor) REFERENCES Proveedor(id_proveedor),
     CONSTRAINT fk_compra_usuario
@@ -122,11 +120,11 @@ CREATE TABLE Compra (
 );
 
 -- ---------------------------------------------------------
--- 10) Tabla: DetalleCompra
+-- 11) Tabla: DetalleCompra (MODIFICADA - código como VARCHAR)
 -- ---------------------------------------------------------
 CREATE TABLE DetalleCompra (
     id_compra INT,
-    codigo INT,
+    codigo VARCHAR(13) NOT NULL,  -- Cambiado de INT a VARCHAR(13)
     cantidad INT NOT NULL,
     costo DECIMAL(10, 2) NOT NULL,
     PRIMARY KEY (id_compra, codigo),
@@ -135,10 +133,6 @@ CREATE TABLE DetalleCompra (
     CONSTRAINT fk_detallecompra_articulo
         FOREIGN KEY (codigo) REFERENCES Articulo(codigo)
 );
-
-
-
--- Script para eliminar los campos de hora de entrada y salida
 
 
 -- Mostrar las tablas creadas
@@ -165,8 +159,7 @@ INSERT INTO Categoria (id_categoria, nombre) VALUES
     (13, 'Deportes y Fitness'),
     (14, 'Alimentos y Bebidas'),
     (15, 'Automotriz'),
-    (16, 'Papelería y Oficina'),
-    (17, 'Salud y Medicinas');
+    (16, 'Papelería y Oficina');
 
 -- ---------------------------------------------------------
 -- Extensión: Insertar unidades de medida predeterminadas para Elektra
@@ -203,15 +196,19 @@ INSERT INTO Proveedor (id_proveedor, nombre, telefono, representante) VALUES
     (9, 'Muebles Dico',                  '9611000014', 'Ernesto López'),
     (10, 'Lamosa Hogar y Decoración',     '9611000015', 'Claudia Vargas');
 
-
-
+INSERT INTO Proveedor (id_proveedor, nombre, telefono, representante) VALUES
+  (11, 'Oster México',                '9611000021', 'Julio Ramírez'),
+  (12, 'Midea México',                '9611000022', 'Ana Castillo'),
+  (13, 'Winia México',                '9611000023', 'Sara López'),
+  (14, 'Misik Audio',                 '9611000024', 'Diego Martínez'),
+  (15, 'Truper México',               '9611000025', 'Carlos Vega');
 
     -- ---------------------------------------------------------
 -- Extensión: Usuarios
 -- ---------------------------------------------------------
 INSERT INTO Usuarios (id_usuario, nombre, departamento, salario, telefono, contraseña) VALUES 
-(1, 'Administrador', 'Administrador', 10000, '9161579322', '07');
-
+(1, 'Administrador', 'Administrador', 10000, '9161579322', '07'),
+(2, 'Vendedor General', 'Ventas', 0, '9161579322', 'elektra');
 
     -- ---------------------------------------------------------
 -- Extensión: Clientes
@@ -219,5 +216,52 @@ INSERT INTO Usuarios (id_usuario, nombre, departamento, salario, telefono, contr
 INSERT INTO Cliente (telefono, nombre, direccion, rfc) VALUES 
 ('5512345678', 'Rodrigo Gonzalez', 'Calle 10 #123, Ciudad X', 'ABC123456XYZ'),
 ('5523456789', 'Alejandro Gutierrez', 'Av. Central #456, Ciudad Y', 'ALF456789DEF'),
-('5534567890', 'Kaleb Gopar', 'Boulevard Norte #789, Ciudad Z', 'SER789012GHI');
+('5534567890', 'Kaleb Toledo', 'Boulevard Norte #789, Ciudad Z', 'SER789012GHI'),
+('0000000000', 'Venta General',NULL,NULL);
 
+-- 2) Insertar los artículos (manteniendo código y nombre)
+INSERT INTO Articulo (
+  codigo, nombre, precio, costo, existencia, reorden,
+  id_categoria, id_proveedor, id_unidad
+) VALUES
+  -- Lavadora Mabe 16 Kg Blanca
+  ("757638969444", 'Lavadora Mabe 16 Kg Blanca',
+    12999.00, 10500.00, 15, 5,
+    6,   -- Línea Blanca
+    6,   -- Mabe de México
+    1),  -- Pieza
+
+  -- Licuadora Oster ActiveSense roja
+  ("7501095200908", 'Licuadora Oster ActiveSense roja',
+     899.00,   650.00, 30, 10,
+     1,   -- Electrodomésticos
+    11,   -- Oster México
+     1),  -- Pieza
+
+  -- Minisplit Midea 1.5 Toneladas 220v Frío
+  ("6938187347394", 'Minisplit Midea 1.5 Toneladas 220v Frio',
+  11999.00,  9000.00, 10, 3,
+     1,   -- Electrodomésticos
+    12,   -- Midea México
+     1),  -- Pieza
+
+  -- Horno de microondas Winia KOS-81HS
+  ("7501744619891", 'Horno de microondas Winia KOS-81HS',
+   2399.00, 1800.00, 20, 5,
+     1,   -- Electrodomésticos
+    13,   -- Winia México
+     1),  -- Pieza
+
+  -- Audífonos inalambricos Misik MH624 negro
+  ("089081900508", 'Audifonos inalambricos Misik MH624 negro',
+   1299.00,   800.00, 25, 5,
+     5,   -- Audio y Video
+    14,   -- Misik Audio
+     1),  -- Pieza
+
+  -- Truper Maletín Suave Portaherramienta 22
+  ("7506240607762", 'Truper Maletín Suave Portaherramienta 22',
+     799.00,   600.00, 40, 10,
+     9,   -- Herramientas y Ferretería
+    15,   -- Truper México
+     1);  -- Pieza

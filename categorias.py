@@ -18,18 +18,19 @@ class CategoriaApp:
 
         # ---------------- INTERFAZ ------------------
 
-        main_frame = tk.Frame(self.container, bg="white")
+        main_frame = tk.Frame(self.container, bg="white",height=500)
         main_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        main_frame.pack_propagate(False)
 
         left_frame = tk.Frame(main_frame, bg="white")
         left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         search_frame = tk.Frame(left_frame, bg="white", padx=10, pady=10)
         search_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(search_frame, text="Buscar ID Categoría:", font=("Helvetica", 10), bg="white")\
+        tk.Label(search_frame, text="Buscar ID Categoría:", font=("Tahoma", 10), bg="white")\
             .pack(side=tk.LEFT)
         self.buscar_var = tk.StringVar()
-        entry_buscar = tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))
+        entry_buscar = ttk.Entry(search_frame, textvariable=self.buscar_var, width=15,font=("tahoma",11),style='Modern.TEntry')
         entry_buscar.pack(side=tk.LEFT, padx=5)
         btn_buscar = ttk.Button(search_frame, text="Buscar", style="Gris.TButton",
                                command=self.buscar_categoria)
@@ -86,14 +87,14 @@ class CategoriaApp:
         self.id_var = tk.StringVar()
         self.nombre_var = tk.StringVar()
 
-        tk.Label(form_right_frame, text="ID Categoría:", font=("Helvetica", 10), bg="white")\
+        tk.Label(form_right_frame, text="ID Categoría:", font=("Tahoma", 10), bg="white")\
             .grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
-        self.id_entry = tk.Entry(form_right_frame, textvariable=self.id_var, width=25, font=("Helvetica", 10))
+        self.id_entry = ttk.Entry(form_right_frame, textvariable=self.id_var, width=25,font=("tahoma",11),style='Modern.TEntry')
         self.id_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Label(form_right_frame, text="Nombre Categoría:", font=("Helvetica", 10), bg="white")\
+        tk.Label(form_right_frame, text="Nombre Categoría:", font=("Tahoma", 10), bg="white")\
             .grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
-        self.nombre_entry = tk.Entry(form_right_frame, textvariable=self.nombre_var, width=25, font=("Helvetica", 10))
+        self.nombre_entry = ttk.Entry(form_right_frame, textvariable=self.nombre_var, width=25,font=("tahoma",11),style='Modern.TEntry')
         self.nombre_entry.grid(row=1, column=1, padx=5, pady=5)
 
         self.cargar_lista_categorias()

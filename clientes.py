@@ -23,9 +23,9 @@ class ClienteApp:
         self.cursor = self.db.cursor()
 
         # Cabecera
-        header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        header = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         header.pack(fill=tk.X)
-        tk.Label(header, text="CLIENTES", font=("Helvetica",14,"bold"), bg="#ECECEC").pack(side=tk.LEFT)
+        tk.Label(header, text="CLIENTES", font=("Tahoma",14,"bold"),fg="white", bg="#8FC9DB").pack(side=tk.LEFT)
 
         # Layout
         main = tk.Frame(self.container, bg="white")
@@ -35,9 +35,9 @@ class ClienteApp:
         left = tk.Frame(main, bg="white")
         left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         sf = tk.Frame(left, bg="white", padx=10, pady=10); sf.pack(fill=tk.X)
-        tk.Label(sf, text="Buscar Teléfono:", bg="white").pack(side=tk.LEFT)
+        tk.Label(sf, text="Buscar Teléfono:", bg="white",font=("Tahoma",10)).pack(side=tk.LEFT)
         self.search_var = tk.StringVar()
-        tk.Entry(sf, textvariable=self.search_var, width=15).pack(side=tk.LEFT, padx=5)
+        ttk.Entry(sf, textvariable=self.search_var,style='Modern.TEntry', width=15,font=("tahoma",11)).pack(side=tk.LEFT, padx=5)
         ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6,
                   command=self.load_clients).pack(side=tk.LEFT)
 
@@ -76,9 +76,9 @@ class ClienteApp:
 
         # Form fields
         tk.Label(form, text="Teléfono (10 dígitos):", bg="white").grid(row=0,column=0,sticky=tk.E,pady=5)
-        tk.Entry(form, textvariable=self.telefono_var, width=25).grid(row=0,column=1,pady=5)
+        ttk.Entry(form, textvariable=self.telefono_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=0,column=1,pady=5)
         tk.Label(form, text="Nombre:", bg="white").grid(row=1,column=0,sticky=tk.E,pady=5)
-        tk.Entry(form, textvariable=self.nombre_var, width=25).grid(row=1,column=1,pady=5)
+        ttk.Entry(form, textvariable=self.nombre_var, width=25,font=("tahoma",11),style='Modern.TEntry').grid(row=1,column=1,pady=5)
 
         # Checkbox para campos opcionales
         tk.Checkbutton(form, text="Datos adicionales", variable=self.advanced_var,
@@ -86,9 +86,9 @@ class ClienteApp:
 
         # Campos opcionales (ocultos inicialmente)
         self.dir_label = tk.Label(form, text="Dirección:", bg="white")
-        self.dir_entry = tk.Entry(form, textvariable=self.direccion_var, width=25)
+        self.dir_entry = ttk.Entry(form, textvariable=self.direccion_var, width=25,font=("tahoma",11),style='Modern.TEntry')
         self.rfc_label = tk.Label(form, text="RFC:", bg="white")
-        self.rfc_entry = tk.Entry(form, textvariable=self.rfc_var, width=25)
+        self.rfc_entry = ttk.Entry(form, textvariable=self.rfc_var, width=25,font=("tahoma",11),style='Modern.TEntry')
 
         # Cargar datos
         self.load_clients()

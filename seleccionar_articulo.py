@@ -26,16 +26,16 @@ class ArticuloSelector:
         self.cursor = self.db.cursor()
 
         # Título
-        header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        header = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         header.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(header, text="SELECCIONAR ARTÍCULO", font=("Helvetica",16,"bold"), bg="#ECECEC").pack(side=tk.LEFT)
+        tk.Label(header, text="SELECCIONAR ARTÍCULO", font=("Tahoma",16,"bold"),fg="white", bg="#8FC9DB").pack(side=tk.LEFT)
 
         # Búsqueda en tiempo real
         search_frame = tk.Frame(self.container, bg="white", padx=10, pady=5)
         search_frame.pack(side=tk.TOP, fill=tk.X)
         tk.Label(search_frame, text="Buscar (código o descripción):", bg="white").pack(side=tk.LEFT)
         self.search_var = tk.StringVar()
-        entry = tk.Entry(search_frame, textvariable=self.search_var, font=("Helvetica",10), width=30)
+        entry = ttk.Entry(search_frame, textvariable=self.search_var, width=25,font=("tahoma",11),style='Modern.TEntry')
         entry.pack(side=tk.LEFT, padx=5)
         entry.bind('<KeyRelease>', lambda e: self.refresh_list())
 

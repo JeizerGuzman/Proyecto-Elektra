@@ -38,7 +38,7 @@ class PuntoDeVenta:
     def on_articulos(self):
         self._limpiar_contenedor()
         tk.Label(self.frame_contenedor, text="Aquí irá la configuración de los Articulos",
-                 font=("Helvetica", 20), bg="white").pack(pady=50)
+                 font=("Tahoma", 20), bg="white").pack(pady=50)
 
     def on_inventario(self):
         InventarioApp(self.frame_contenedor)
@@ -98,13 +98,13 @@ class PuntoDeVenta:
 
     def main(self):
         # Cabecera
-        cabecera = tk.Frame(self.root, bg="#ECECEC", height=30)
+        cabecera = tk.Frame(self.root, bg="#394F66", height=30)
         cabecera.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(cabecera, text="Punto de Venta Elektra", font=("Helvetica", 10, "bold"), bg="#ECECEC").pack(side=tk.LEFT, padx=10, pady=5)
-        tk.Label(cabecera, text=f"Atiende: {self.usuario} ", font=("Helvetica", 10, "bold"), bg="#ECECEC").pack(side=tk.RIGHT, padx=10, pady=5)
+        tk.Label(cabecera, text="Punto de Venta Elektra", font=("Tahoma", 10, "bold"), bg="#394F66",fg="#FFFFFF").pack(side=tk.LEFT, padx=10, pady=5)
+        tk.Label(cabecera, text=f"Atiende: {self.usuario} ", font=("Tahoma", 10, "bold"), bg="#394F66",fg="#FFFFFF").pack(side=tk.RIGHT, padx=10, pady=5)
 
         # Menú
-        menu = tk.Frame(self.root, bg="#D0D0D0", height=40)
+        menu = tk.Frame(self.root, bg="#FFFFFF", height=40)
         menu.pack(side=tk.TOP, fill=tk.X)
 
         # Definimos los botones con sus comandos

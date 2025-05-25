@@ -25,9 +25,9 @@ class InventarioApp:
         # -------------------------------------------
         # Título "INVENTARIO"
         # -------------------------------------------
-        title_frame = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
+        title_frame = tk.Frame(self.container, bg="#8FC9DB", height=40, padx=10, pady=5)
         title_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(title_frame, text="INVENTARIO", font=("Helvetica", 14, "bold"), bg="#ECECEC")\
+        tk.Label(title_frame, text="INVENTARIO", font=("Tahoma", 14, "bold"),fg="white", bg="#8FC9DB")\
             .pack(side=tk.LEFT)
         
         # -------------------------------------------
@@ -43,10 +43,10 @@ class InventarioApp:
         # 1) Barra de búsqueda (por código o nombre)
         search_frame = tk.Frame(left_frame, bg="white", padx=10, pady=10)
         search_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Label(search_frame, text="Buscar Artículo (ID o Nombre):", font=("Helvetica", 10), bg="white")\
+        tk.Label(search_frame, text="Buscar Artículo (ID o Nombre):", font=("Tahoma", 10), bg="white")\
             .pack(side=tk.LEFT)
         self.buscar_var = tk.StringVar()
-        tk.Entry(search_frame, textvariable=self.buscar_var, width=20, font=("Helvetica", 10))\
+        ttk.Entry(search_frame, textvariable=self.buscar_var, width=20, font=("tahoma",11),style='Modern.TEntry')\
             .pack(side=tk.LEFT, padx=5)
         ttk.Button(search_frame, text="Buscar", style="Gris.TButton",width=6,
                   command=self.buscar_articulo).pack(side=tk.LEFT, padx=5)
@@ -116,9 +116,9 @@ class InventarioApp:
             ("ID Unidad:", self.und_var, 8)
         ]
         for text, var, row in labels:
-            tk.Label(form_right_frame, text=text, font=("Helvetica", 10), bg="white")\
+            tk.Label(form_right_frame, text=text, font=("Tahoma", 10), bg="white")\
                 .grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-            tk.Entry(form_right_frame, textvariable=var, width=25, font=("Helvetica", 10))\
+            ttk.Entry(form_right_frame, textvariable=var, width=25,font=("tahoma",11),style='Modern.TEntry')\
                 .grid(row=row, column=1, padx=5, pady=5)
         
         # Carga inicial de artículos

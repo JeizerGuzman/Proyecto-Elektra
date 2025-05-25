@@ -32,22 +32,85 @@ class VentanaLogin:
         # Usuario (por nombre)
         tk.Label(self.widget, text="Usuario", font=("tahoma",12,"bold"), bg="white").pack()
         self.nombre_var = tk.StringVar()
-        # Carga nombres desde BD
+        # Configuración del estilo (hazlo una vez al inicio de tu aplicación)
+        style = ttk.Style()
+        style.theme_use('clam')  # Necesario para personalización
+
+        # Estilo que replica el Combobox original pero mejorado
+        style.configure('Enhanced.TCombobox',
+                        font=('Tahoma', 12),
+                        foreground='#000000',
+                        background='#FFFFFF',
+                        bordercolor='#707070',
+                        arrowsize=14,
+                        padding=(6, 4),
+                        relief='solid',
+                        borderwidth=1)
+
+        style.map('Enhanced.TCombobox',
+                fieldbackground=[('readonly', '#FFFFFF')],
+                selectbackground=[('readonly', '#E1E1E1')],
+                selectforeground=[('readonly', '#000000')],
+                bordercolor=[('focus', '#0078D7')],
+                arrowsize=[('pressed', 12), ('!pressed', 14)])
+
+        # Versión mejorada que mantiene toda la funcionalidad original
         self.cursor.execute("SELECT nombre FROM Usuarios")
         nombres = [r[0] for r in self.cursor.fetchall()]
-        self.cmb_usuario = ttk.Combobox(self.widget, values=nombres, textvariable=self.nombre_var)
-        self.cmb_usuario.config(font=("tahoma",12), width=23)
-        self.cmb_usuario.bind("<<ComboboxSelected>>", self._mostrar_cargo)
-        self.cmb_usuario.pack()
 
+        self.cmb_usuario = ttk.Combobox(
+            self.widget, 
+            values=nombres,
+            textvariable=self.nombre_var,
+            font=('Tahoma', 12),
+            width=23,
+            style='Enhanced.TCombobox',
+            state="readonly"  # Asegura que sea solo de selección
+        )
+
+        # Mantenemos todos los binds y funciones originales
+        self.cmb_usuario.bind("<<ComboboxSelected>>", self._mostrar_cargo)
+        self.cmb_usuario.pack(pady=5)  # Pequeño espacio adicional para mejor legibilidad
+
+        # Opcional: Placeholder para mejor UX
+        if not nombres:  # Si no hay usuarios
+            self.cmb_usuario.set("-- Seleccione usuario --")
+            self.cmb_usuario['state'] = 'disabled'
+        else:
+            self.cmb_usuario.current(0)  # Selecciona el primer item por defecto
         # Cargo mostrado
         self.cargo_label = tk.Label(self.widget, text="Cargo: ", font=("tahoma",12), bg="white")
         self.cargo_label.pack(pady=5)
 
         # Contraseña
         tk.Label(self.widget, text="Contraseña", font=("tahoma",12,"bold"), bg="white").pack()
-        self.entry_pwd = tk.Entry(self.widget, show="*", font=("tahoma",12), width=25)
-        self.entry_pwd.pack()
+        # Configuración del estilo para el Entry que coincida con el Combobox
+        style = ttk.Style()
+        style.theme_use('clam')
+
+        # Estilo para Entry que coincide con el Combobox mejorado
+        style.configure('Modern.TEntry',
+                    font=('Tahoma', 12),
+                    foreground='#000000',
+                    background='#FFFFFF',
+                    bordercolor='#707070',
+                    padding=(6, 4),
+                    relief='solid',
+                    borderwidth=1)
+
+        style.map('Modern.TEntry',
+                bordercolor=[('focus', '#0078D7')],  # Borde azul al enfocar
+                fieldbackground=[('!disabled', '#FFFFFF')])
+
+        # Entry con el mismo estilo que el Combobox
+        self.entry_pwd = ttk.Entry(
+            self.widget, 
+            show="*", 
+            style='Modern.TEntry',
+            width=25,
+            font=('Tahoma', 12)
+        )
+        self.entry_pwd.pack(pady=5)
         self.var_show = tk.BooleanVar()
         tk.Checkbutton(self.widget, text="Ver contraseña", variable=self.var_show,
                        command=self._ver_contraseña, font=("tahoma",12), bg="white").pack(pady=10)
