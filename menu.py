@@ -51,7 +51,7 @@ class PuntoDeVenta:
 
     def on_venta(self):
         self._limpiar_contenedor()
-        VentaApp(self.frame_contenedor)
+        VentaApp(self.frame_contenedor,self.usuario)
 
     def on_clientes(self):
         self._limpiar_contenedor()
