@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # Asegúrate de que conexion.py está en el mismo directorio
+from botones import configurar_estilos
+
+
 
 class ProveedorApp:
     def __init__(self, container):
@@ -12,6 +15,8 @@ class ProveedorApp:
         for widget in self.container.winfo_children():
             widget.destroy()
         self.container.configure(bg="white")
+        configurar_estilos(self.container)
+        
         
         # Conexión a la base de datos
         self.db = conexion.conectar()
@@ -43,7 +48,7 @@ class ProveedorApp:
         self.buscar_var = tk.StringVar()
         tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
+        ttk.Button(search_frame, text="Buscar",style="Gris.TButton",width=6,
                   command=self.buscar_proveedor).pack(side=tk.LEFT, padx=5)
         
         # 2) Treeview (muestra ID, Empresa y Representante)
@@ -64,14 +69,11 @@ class ProveedorApp:
         # Frame para botones (Nuevo, Eliminar, Guardar)
         btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         btn_right_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Button(btn_right_frame, text="Nuevo Proveedor", font=("Helvetica", 10, "bold"),
-                  bg="#87CEEB", fg="white", width=15, command=self.nuevo_proveedor)\
+        ttk.Button(btn_right_frame, text="Limpiar Datos",style="Azul.TButton", width=15, command=self.nuevo_proveedor)\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"),
-                  bg="red", fg="white", width=8, command=self.eliminar_proveedor)\
+        ttk.Button(btn_right_frame, text="Eliminar Proveedor",style="Peligro.TButton", command=self.eliminar_proveedor)\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"),
-                  bg="green", fg="white", width=8, command=self.guardar_proveedor)\
+        ttk.Button(btn_right_frame, text="Guardar Proveedor",style="Exito.TButton", command=self.guardar_proveedor)\
             .pack(side=tk.LEFT, padx=5)
         
         # Frame del formulario

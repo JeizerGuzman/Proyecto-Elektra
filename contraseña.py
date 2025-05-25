@@ -3,6 +3,9 @@ from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 import os
 import conexion  # tu módulo conexion.py
+from botones import configurar_estilos
+
+
 
 class VentanaLogin:
     def __init__(self):
@@ -11,7 +14,10 @@ class VentanaLogin:
         self.ventana.state("zoomed")
         self.ventana.config(bg="white")
         self.ventana.resizable(False, False)
-
+        configurar_estilos(self.ventana)
+        
+        
+        
         # Conexión y cursor
         self.db = conexion.conectar()
         self.cursor = self.db.cursor()
@@ -47,8 +53,8 @@ class VentanaLogin:
                        command=self._ver_contraseña, font=("tahoma",12), bg="white").pack(pady=10)
 
         # Botón Iniciar
-        tk.Button(self.widget, text="Iniciar Sesión", command=self._iniciar_sesion,
-                  fg="white", bg="green", font=("tahoma",12), width=15).pack(pady=20)
+        ttk.Button(self.widget, text="Iniciar Sesión", command=self._iniciar_sesion,
+                  style="Exito.TButton", width=15).pack(pady=20)
 
     def _cargar_fondo(self):
         dir_act = os.path.dirname(os.path.abspath(__file__))

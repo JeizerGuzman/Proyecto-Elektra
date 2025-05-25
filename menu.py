@@ -9,6 +9,8 @@ from configuracion import ConfiguracionesApp
 from datetime import datetime
 import locale
 from inventario import InventarioApp
+from historial import HistorialApp
+from botones import configurar_estilos
 
 
 
@@ -21,7 +23,9 @@ class PuntoDeVenta:
         self.root.state("zoomed") 
         self.root.configure(bg="white")
         self.root.resizable(False, False)
-
+        configurar_estilos(root)
+        
+        
     def on_salir(self):
         self.root.destroy()
 
@@ -43,11 +47,6 @@ class PuntoDeVenta:
         self._limpiar_contenedor()
         ProveedorApp(self.frame_contenedor)
 
-    def on_eliminar_ticket(self):
-        messagebox.showinfo("Eliminar Ticket", "Funcionalidad de eliminar ticket no implementada aún.")
-
-    def on_asignar_usuario(self):
-        messagebox.showinfo("Asignar Usuario", "Funcionalidad de asignar usuario no implementada aún.")
 
     def on_venta(self):
         self._limpiar_contenedor()
@@ -70,8 +69,7 @@ class PuntoDeVenta:
 
     def on_reportes(self):
         self._limpiar_contenedor()
-        tk.Label(self.frame_contenedor, text="Aquí iran los detalles de venta y compra",
-                 font=("Helvetica", 20), bg="white").pack(pady=50)
+        HistorialApp(self.frame_contenedor)
 
     def actualizar_fecha_hora(self):
             # Configurar la localización a español}
@@ -109,22 +107,28 @@ class PuntoDeVenta:
         menu = tk.Frame(self.root, bg="#D0D0D0", height=40)
         menu.pack(side=tk.TOP, fill=tk.X)
 
+        # Definimos los botones con sus comandos
         botones = [
-            ("Ventas", self.on_venta),
-            ("Clientes", self.on_clientes),
-            ("Articulos", self.on_articulos),
-            ("Inventario", self.on_inventario),
-            ("Proveedores", self.on_proveedores),
-            ("Configuracion", self.on_configuracion),
-            ("Reportes", self.on_reportes),
+            ("Ventas", self.on_venta, "Indigo"),          # Azul para Ventas
+            ("Clientes", self.on_clientes, "Indigo"),  # Verde oscuro para Clientes
+            ("Inventario", self.on_inventario, "Indigo"), # Morado para Inventario
+            ("Proveedores", self.on_proveedores, "Indigo"), # Naranja para Proveedores
+            ("Historial", self.on_reportes, "Indigo"),      # Cian para Historial
+            ("Configuración", self.on_configuracion, "Gris") # Gris para Configuración
         ]
 
-        for texto, comando in botones:
-            tk.Button(menu, text=texto, font=("Helvetica", 10, "bold"), width=12, command=comando).pack(side=tk.LEFT, padx=5, pady=5)
-
+        for texto, comando, color in botones:
+            btn = ttk.Button(
+                menu,
+                text=texto,
+                style=f"{color}.TButton",
+                command=comando,
+                width=12  # Mantenemos el ancho que tenías originalmente
+            )
+            btn.pack(side=tk.LEFT, padx=5, pady=5)
         # Botones lado derecho
-        tk.Button(menu, text="Salir", font=("Helvetica", 10, "bold"), bg="red", fg="white", width=10, command=self.on_salir).pack(side=tk.RIGHT, padx=5)
-        tk.Button(menu, text="Cambiar Usuario", font=("Helvetica", 10, "bold"), bg="#87CEFA", width=15, command=self.cambiar_usuario).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(menu, text="Salir", style="Peligro.TButton", width=10, command=self.on_salir).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(menu, text="Cambiar Usuario", style="Cian.TButton", width=15, command=self.cambiar_usuario).pack(side=tk.RIGHT, padx=5)
         
 
         # Frame contenedor

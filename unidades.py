@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # Tu módulo conexion.py
+from botones import configurar_estilos
 
 class UnidadApp:
     def __init__(self, container):
@@ -9,7 +10,9 @@ class UnidadApp:
         for w in self.container.winfo_children():
             w.destroy()
         self.container.configure(bg="white")
-
+        configurar_estilos(self.container)
+        
+        
         # Conexión
         self.db = conexion.conectar()
         self.cursor = self.db.cursor()
@@ -35,7 +38,7 @@ class UnidadApp:
         sf.pack(fill=tk.X)
         tk.Label(sf, text="Buscar ID Unidad:", bg="white").pack(side=tk.LEFT)
         tk.Entry(sf, textvariable=self.buscar_var, width=10).pack(side=tk.LEFT, padx=5)
-        tk.Button(sf, text="Buscar", command=self.buscar_unidad).pack(side=tk.LEFT)
+        ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6, command=self.buscar_unidad).pack(side=tk.LEFT)
 
         self.tree = ttk.Treeview(left, columns=("id","nombre"), show="headings", height=15)
         self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -54,12 +57,9 @@ class UnidadApp:
         bf = tk.Frame(right, bg="white", pady=10)
         bf.pack(fill=tk.X)
 
-        tk.Button(bf, text="Nueva Unidad", font=("Helvetica", 10, "bold"),
-                              bg="#87CEEB", fg="white", width=15, command=self.nueva_unidad).pack(side=tk.LEFT, padx=5)
-        tk.Button(bf, text="Eliminar", font=("Helvetica", 10, "bold"),
-                                 bg="red", fg="white", width=8, command=self.eliminar_unidad).pack(side=tk.LEFT, padx=5)
-        tk.Button(bf, text="Guardar", font=("Helvetica", 10, "bold"),
-                                bg="green", fg="white", width=8, command=self.guardar_unidad).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bf, text="Limpiar Datos", style="Azul.TButton", command=self.nueva_unidad).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bf, text="Eliminar Unidad", style="Peligro.TButton", command=self.eliminar_unidad).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bf, text="Guardar Unidad", style="Exito.TButton", command=self.guardar_unidad).pack(side=tk.LEFT, padx=5)
         
         
 

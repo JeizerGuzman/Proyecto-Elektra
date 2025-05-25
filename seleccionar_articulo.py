@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # Asegúrate de que conexion.py está en el mismo directorio
+from botones import configurar_estilos
+
+
 
 class ArticuloSelector:
     def __init__(self, container, on_select_callback):
@@ -10,7 +13,9 @@ class ArticuloSelector:
         """
         self.container = container
         self.on_select = on_select_callback
-
+        configurar_estilos(self.container)
+        
+        
         # Limpiar contenedor
         for w in self.container.winfo_children():
             w.destroy()
@@ -52,7 +57,7 @@ class ArticuloSelector:
         # Botón de selección
         btn_frame = tk.Frame(self.container, bg="white", pady=10)
         btn_frame.pack(side=tk.BOTTOM)
-        tk.Button(btn_frame, text="Confirmar Selección", bg="#87CEEB", fg="white", font=("Helvetica",10,"bold"),
+        ttk.Button(btn_frame, text="Confirmar Selección",style="Azul.TButton",
                   command=self.confirm_selection).pack()
 
         # Carga inicial

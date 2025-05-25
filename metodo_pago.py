@@ -4,7 +4,7 @@ from datetime import date
 import os
 from PIL import Image, ImageDraw, ImageFont
 from conexion import conectar
-
+from botones import configurar_estilos
 
 class MetodoPagoApp:
     """
@@ -19,7 +19,9 @@ class MetodoPagoApp:
         self.venta_data = venta_data
         self.on_finish = on_finish_callback
         self.usuario = usuario_nombre or f"Usuario {venta_data.get('usuario_id', '')}"
-
+        configurar_estilos(self.parent)
+        
+        
         # Conexión BD
         self.db = conectar()
         self.cursor = self.db.cursor()
@@ -84,9 +86,9 @@ class MetodoPagoApp:
         # Botones de acción
         btn_frame = ttk.Frame(self.parent)
         btn_frame.pack(fill=tk.X, padx=20, pady=20)
-        ttk.Button(btn_frame, text="Cobrar e Imprimir", command=lambda: self._procesar_pago(imprimir=True), style="Success.TButton").pack(side=tk.LEFT, padx=10)
-        ttk.Button(btn_frame, text="Cobrar sin imprimir", command=lambda: self._procesar_pago(imprimir=False), style="Success.TButton").pack(side=tk.LEFT, padx=10)
-        ttk.Button(btn_frame, text="Cancelar", command=self._cancelar, style="Danger.TButton").pack(side=tk.RIGHT, padx=10)
+        ttk.Button(btn_frame, text="Cobrar e Imprimir", command=lambda: self._procesar_pago(imprimir=True), style="Turquesa.TButton",width=25).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn_frame, text="Cobrar sin imprimir", command=lambda: self._procesar_pago(imprimir=False), style="Naranja.TButton",width=25).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn_frame, text="Cancelar", command=self._cancelar, style="Peligro.TButton",width=10).pack(side=tk.RIGHT, padx=15)
 
     def _calcular_cambio(self):
         try:
@@ -110,7 +112,7 @@ class MetodoPagoApp:
         self.db.commit()
 
     def _generar_ticket_png(self):
-        folder = 'tickets'
+        folder = 'FOLDER_TICKETS'
         os.makedirs(folder, exist_ok=True)
         path = os.path.join(folder, f"ticket_{self.folio}.png")
         img = Image.new('RGB', (600, 800), 'white')

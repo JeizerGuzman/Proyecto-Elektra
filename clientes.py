@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # tu módulo conexion.py
+from botones import configurar_estilos
+
+
 
 class ClienteApp:
     def __init__(self, container):
@@ -12,7 +15,9 @@ class ClienteApp:
         self.container = container
         for w in self.container.winfo_children(): w.destroy()
         self.container.configure(bg="white")
-
+        configurar_estilos(self.container)
+        
+        
         # Conexión
         self.db = conexion.conectar()
         self.cursor = self.db.cursor()
@@ -33,7 +38,7 @@ class ClienteApp:
         tk.Label(sf, text="Buscar Teléfono:", bg="white").pack(side=tk.LEFT)
         self.search_var = tk.StringVar()
         tk.Entry(sf, textvariable=self.search_var, width=15).pack(side=tk.LEFT, padx=5)
-        tk.Button(sf, text="Buscar", bg="#A9A9A9", fg="white", font=("Helvetica",9,"bold"),
+        ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6,
                   command=self.load_clients).pack(side=tk.LEFT)
 
         cols = ("telefono","nombre")
@@ -50,11 +55,13 @@ class ClienteApp:
         right = tk.Frame(main, bg="white", padx=10, pady=10)
         right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         bf = tk.Frame(right, bg="white", pady=10); bf.pack(fill=tk.X)
-        actions = [("Nuevo Cliente", self.new_client, "#87CEEB"),
-                   ("Guardar", self.save_client, "green"),
-                   ("Eliminar", self.delete_client, "red")]
-        for txt, cmd, col in actions:
-            tk.Button(bf, text=txt, bg=col, fg="white", font=("Helvetica",10,"bold"), width=12,
+        actions = [("Limpiar Datos", self.new_client, "Azul"),
+                   ("Guardar Cliente", self.save_client,"Exito"),
+                   ("Eliminar Cliente", self.delete_client,"Peligro")]
+        for txt, cmd, st in actions:
+            ttk.Button(bf, 
+                       text=txt, 
+                       style=f"{st}.TButton",
                       command=cmd).pack(side=tk.LEFT, padx=5)
 
         form = tk.Frame(right, bg="white", padx=10, pady=10)

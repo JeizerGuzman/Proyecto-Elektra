@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # Asegúrate de que conexion.py está en el mismo directorio
+from botones import configurar_estilos
+
+
 
 class InventarioApp:
     def __init__(self, container):
@@ -12,6 +15,8 @@ class InventarioApp:
         for widget in self.container.winfo_children():
             widget.destroy()
         self.container.configure(bg="white")
+        configurar_estilos(self.container)
+        
         
         # Conexión a la base de datos
         self.db = conexion.conectar()
@@ -43,7 +48,7 @@ class InventarioApp:
         self.buscar_var = tk.StringVar()
         tk.Entry(search_frame, textvariable=self.buscar_var, width=20, font=("Helvetica", 10))\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
+        ttk.Button(search_frame, text="Buscar", style="Gris.TButton",width=6,
                   command=self.buscar_articulo).pack(side=tk.LEFT, padx=5)
         
         # 2) Treeview (muestra todos los campos del artículo)
@@ -76,14 +81,11 @@ class InventarioApp:
         # Frame para botones (Nuevo, Eliminar, Guardar)
         btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         btn_right_frame.pack(side=tk.TOP, fill=tk.X)
-        tk.Button(btn_right_frame, text="Nuevo Artículo", font=("Helvetica", 10, "bold"),
-                  bg="#87CEEB", fg="white", width=15, command=self.nuevo_articulo)\
+        ttk.Button(btn_right_frame, text="Limpiar Datos",style="Azul.TButton", command=self.nuevo_articulo)\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"),
-                  bg="red", fg="white", width=8, command=self.eliminar_articulo)\
+        ttk.Button(btn_right_frame, text="Eliminar",style="Peligro.TButton", command=self.eliminar_articulo)\
             .pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"),
-                  bg="green", fg="white", width=8, command=self.guardar_articulo)\
+        ttk.Button(btn_right_frame, text="Guardar",style="Exito.TButton", width=8, command=self.guardar_articulo)\
             .pack(side=tk.LEFT, padx=5)
         
         # Frame del formulario

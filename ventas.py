@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox
 import conexion  # Asegúrate de que conexion.py está en el mismo directorio
 from seleccionar_articulo import ArticuloSelector
 from metodo_pago import MetodoPagoApp
+from botones import configurar_estilos
+
 
 class VentaApp:
     def __init__(self, container, usuario_nombre=None):
@@ -21,7 +23,10 @@ class VentaApp:
         self.items = {}  # {codigo: [nombre, precio, cantidad, existencia]}
         # Mostrar interfaz de ventas
         self.show_sale_ui()
-
+        configurar_estilos(self.container)
+        
+        
+        
     def _get_usuario_id(self, nombre):
         try:
             self.cursor.execute("SELECT id_usuario FROM Usuarios WHERE nombre = %s", (nombre,))
@@ -47,8 +52,7 @@ class VentaApp:
         # Botón Agregar Artículo
         sf = tk.Frame(self.container, bg="white", padx=10, pady=5)
         sf.pack(fill=tk.X)
-        tk.Button(sf, text="Agregar Artículo", bg="#87CEEB", fg="white",
-                  font=("Helvetica",10,"bold"), command=self.show_selector_ui).pack(side=tk.LEFT)
+        ttk.Button(sf, text="Agregar Artículo", style="Azul.TButton", command=self.show_selector_ui).pack(side=tk.LEFT)
 
         # Tabla ticket
         cols = ("codigo","descripcion","precio","cantidad","importe","existencia")
@@ -71,23 +75,20 @@ class VentaApp:
         self.client_cb.pack(side=tk.LEFT, padx=5)
 
         # Eliminar y vaciar
-        tk.Button(bf, text="Eliminar Producto", bg="#ff4d4d", fg="white",
-                  font=("Helvetica",10,"bold"), command=self.del_producto).pack(side=tk.LEFT, padx=5)
-        tk.Button(bf, text="Vaciar Ticket", bg="#ff4d4d", fg="white",
-                  font=("Helvetica",10,"bold"), command=self.clear_ticket).pack(side=tk.LEFT, padx=5)
+        ttk.Button(sf, text="Eliminar Articulo", style="Advertencia.TButton", command=self.del_producto).pack(side=tk.LEFT, padx=15)
+        ttk.Button(bf, text="Vaciar Ticket", style="Peligro.TButton", command=self.clear_ticket).pack(side=tk.LEFT, padx=5)
 
         # Subtotal y Total
         totals_frame = tk.Frame(bf, bg="#ECECEC")
         totals_frame.pack(side=tk.RIGHT)
         self.lbl_sub = tk.Label(totals_frame, text="Subtotal: $0.00",
                                 font=("Helvetica",12,"bold"), bg="#ECECEC")
-        self.lbl_sub.pack()
+        #self.lbl_sub.pack()
         self.lbl_tot = tk.Label(totals_frame, text="Total: $0.00",
                                 font=("Helvetica",14,"bold"), bg="#ECECEC")
         self.lbl_tot.pack()
         # Botón Cobrar
-        tk.Button(totals_frame, text="Cobrar", bg="#28a745", fg="white",
-                  font=("Helvetica",10,"bold"), width=10,
+        ttk.Button(totals_frame, text="Cobrar",style="Exito.TButton", width=10,
                   command=self._open_metodo_pago).pack(pady=5)
 
         self.refresh_ticket()
@@ -154,6 +155,8 @@ class VentaApp:
             self.tree.insert('', tk.END, values=(
                 codigo, nombre, f"{precio:.2f}", cantidad, f"{imp:.2f}", existencia))
         self.lbl_sub.config(text=f"Subtotal: ${sub:.2f}")
+        
+        #importe
         self.lbl_tot.config(text=f"Total: ${sub:.2f}")
 
     def del_producto(self):

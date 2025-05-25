@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import conexion  # Asegúrate que 'conexion.py' está en el mismo directorio
+from botones import configurar_estilos
+
 
 class CategoriaApp:
     def __init__(self, container):
@@ -8,7 +10,8 @@ class CategoriaApp:
         for widget in self.container.winfo_children():
             widget.destroy()
         self.container.configure(bg="white")
-
+        configurar_estilos(self.container)
+        
         # Conexión a la base de datos
         self.db = conexion.conectar()
         self.cursor = self.db.cursor()
@@ -28,8 +31,9 @@ class CategoriaApp:
         self.buscar_var = tk.StringVar()
         entry_buscar = tk.Entry(search_frame, textvariable=self.buscar_var, width=15, font=("Helvetica", 10))
         entry_buscar.pack(side=tk.LEFT, padx=5)
-        btn_buscar = tk.Button(search_frame, text="Buscar", font=("Helvetica", 9, "bold"), bg="#A9A9A9",
+        btn_buscar = ttk.Button(search_frame, text="Buscar", style="Gris.TButton",
                                command=self.buscar_categoria)
+        btn_buscar.config(width=6)
         btn_buscar.pack(side=tk.LEFT, padx=5)
 
         self.tree = ttk.Treeview(left_frame, columns=("id", "nombre"), show="headings", height=20)
@@ -48,16 +52,34 @@ class CategoriaApp:
 
         btn_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         btn_right_frame.pack(side=tk.TOP, fill=tk.X)
-        btn_nuevo = tk.Button(btn_right_frame, text="Nueva Categoría", font=("Helvetica", 10, "bold"),
-                              bg="#87CEEB", fg="white", width=15, command=self.nueva_categoria)
+        
+        btn_nuevo = ttk.Button(
+            btn_right_frame,
+            text="Limpiar Datos",
+            style="Azul.TButton",  # Estilo equivalente al azul claro
+            command=self.nueva_categoria
+        )
         btn_nuevo.pack(side=tk.LEFT, padx=5)
-        btn_eliminar = tk.Button(btn_right_frame, text="Eliminar", font=("Helvetica", 10, "bold"),
-                                 bg="red", fg="white", width=8, command=self.eliminar_categoria)
+        
+        # Botón Eliminar (equivalente a bg="red")
+        btn_eliminar = ttk.Button(
+            btn_right_frame,
+            text="Eliminar Categoria",
+            style="Peligro.TButton",  # Estilo rojo
+            command=self.eliminar_categoria
+        )
         btn_eliminar.pack(side=tk.LEFT, padx=5)
-        btn_guardar = tk.Button(btn_right_frame, text="Guardar", font=("Helvetica", 10, "bold"),
-                                bg="green", fg="white", width=8, command=self.guardar_categoria)
+        
+        # Botón Guardar (equivalente a bg="green")
+        btn_guardar = ttk.Button(
+            btn_right_frame,
+            text="Guardar Categoria",
+            style="Exito.TButton",  # Estilo verde
+            command=self.guardar_categoria
+        )
+        
         btn_guardar.pack(side=tk.LEFT, padx=5)
-
+        btn_guardar.pack(side=tk.LEFT, padx=5)
         form_right_frame = tk.Frame(right_frame, bg="white", padx=10, pady=10)
         form_right_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 

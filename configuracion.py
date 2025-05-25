@@ -3,48 +3,69 @@ from tkinter import ttk, messagebox
 import conexion  # tu módulo de conexión
 from categorias import CategoriaApp
 from unidades import UnidadApp
+from botones import configurar_estilos
+
+
+
 
 class ConfiguracionesApp:
     def __init__(self, container):
         self.container = container
-        for w in self.container.winfo_children(): w.destroy()
+        for w in self.container.winfo_children(): 
+            w.destroy()
         self.container.configure(bg="white")
-
-        # Cabecera
+        configurar_estilos(self.container)
+        
+        
+        # Cabecera general
         header = tk.Frame(self.container, bg="#ECECEC", height=40, padx=10, pady=5)
         header.pack(fill=tk.X)
-        tk.Label(header, text="CONFIGURACIONES", font=("Helvetica",14,"bold"), bg="#ECECEC")\
-            .pack(side=tk.LEFT)
+        tk.Label(header, text="CONFIGURACIONES", font=("Helvetica",14,"bold"),
+                 bg="#ECECEC").pack(side=tk.LEFT)
 
-        # Navegación
+        # Contenedor principal: nav + content
         main = tk.Frame(self.container, bg="white")
         main.pack(fill=tk.BOTH, expand=True)
+
+        # Barra de navegación
         nav = tk.Frame(main, bg="#F0F0F0", height=40)
         nav.pack(fill=tk.X)
-        tk.Button(nav, text="Usuarios",   font=("Helvetica",10,"bold"), width=15,
+        ttk.Button(nav, text="Usuarios",  style="Morado.TButton", width=15,
                   command=self.on_usuarios).pack(side=tk.LEFT, padx=5, pady=5)
-        tk.Button(nav, text="Categorías", font=("Helvetica",10,"bold"), width=15,
+        ttk.Button(nav, text="Categorías", style="Morado.TButton", width=15,
                   command=self.on_categorias).pack(side=tk.LEFT, padx=5, pady=5)
-        tk.Button(nav, text="Unidades",    font=("Helvetica",10,"bold"), width=18,
+        ttk.Button(nav, text="Unidades",   style="Morado.TButton", width=15,
                   command=self.on_unidades).pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Label dinámico de sección
+        self.section_title = tk.Label(main, text="", font=("Helvetica",12,"bold"),
+                                      bg="white", anchor="w", pady=5)
+        self.section_title.pack(fill=tk.X, padx=10)
 
         # Contenedor de vista
         self.content = tk.Frame(main, bg="white")
         self.content.pack(fill=tk.BOTH, expand=True)
+
+        # Arranca en Usuarios
         self.on_usuarios()
 
     def _clear(self):
-        for w in self.content.winfo_children(): w.destroy()
+        for w in self.content.winfo_children(): 
+            w.destroy()
 
     def on_usuarios(self):
+        # Actualiza título y contenido
+        self.section_title.config(text="Usuarios")
         self._clear()
         UsuarioApp(self.content)
 
     def on_categorias(self):
+        self.section_title.config(text="Categorías")
         self._clear()
         CategoriaApp(self.content)
 
     def on_unidades(self):
+        self.section_title.config(text="Unidades")
         self._clear()
         UnidadApp(self.content)
 
@@ -76,7 +97,7 @@ class UsuarioApp:
         sf = tk.Frame(left, bg="white", padx=10, pady=10); sf.pack(fill=tk.X)
         tk.Label(sf, text="Buscar ID Usuario:", bg="white").pack(side=tk.LEFT)
         tk.Entry(sf, textvariable=self.search_var, width=15).pack(side=tk.LEFT, padx=5)
-        tk.Button(sf, text="Buscar", bg="#A9A9A9", fg="white", font=("Helvetica",9,"bold"),
+        ttk.Button(sf, text="Buscar",style="Gris.TButton",width=6,
                   command=self.load_users).pack(side=tk.LEFT)
 
         cols = ("id","dep","nom")
@@ -95,12 +116,12 @@ class UsuarioApp:
         right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         bf = tk.Frame(right, bg="white", pady=10); bf.pack(fill=tk.X)
         actions = [
-            ("Nuevo Usuario", self.new_user, "#87CEEB"),
-            ("Guardar Usuario", self.save_user, "green"),
-            ("Eliminar Usuario", self.delete_user, "red")
+            ("Limpiar Datos", self.new_user, "Azul"),
+            ("Guardar Usuario", self.save_user, "Exito"),
+            ("Eliminar Usuario", self.delete_user, "Peligro")
         ]
-        for txt, cmd, col in actions:
-            tk.Button(bf, text=txt, bg=col, fg="white", font=("Helvetica",10,"bold"), width=15,
+        for txt, cmd, st in actions:
+            ttk.Button(bf, text=txt, style=f"{st}.TButton", width=15,
                       command=cmd).pack(side=tk.LEFT, padx=5)
 
         form = tk.Frame(right, bg="white", padx=10, pady=10)
