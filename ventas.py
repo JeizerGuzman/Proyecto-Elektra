@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox,simpledialog 
 import conexion  # Asegúrate de que conexion.py está en el mismo directorio
 from seleccionar_articulo import ArticuloSelector
 from metodo_pago import MetodoPagoApp
@@ -40,6 +40,63 @@ class VentaApp:
         for w in self.container.winfo_children():
             w.destroy()
 
+    
+    def add_article(self, codigo, nombre, precio, existencia, cantidad=1):
+        """Función auxiliar para agregar artículos al ticket"""
+        
+        if codigo in self.items:
+            new_cantidad = self.items[codigo][2] + cantidad
+            if new_cantidad > existencia:
+                messagebox.showwarning("Sin stock", "No hay suficiente existencia.")
+                return False
+            self.items[codigo][2] = new_cantidad
+        else:
+            self.items[codigo] = [nombre, float(precio), cantidad, int(existencia)]
+        self.refresh_ticket()
+        return True
+
+    def handle_barcode_entry(self, event):
+        """Maneja la entrada de código de barras"""
+        codigo = self.barcode_entry.get().strip()
+        
+        # Validar longitud del código
+        if len(codigo) not in (12, 13):
+            messagebox.showwarning("Código inválido", "El código debe tener 12 o 13 dígitos.")
+            self.barcode_entry.delete(0, tk.END)
+            return
+            
+        try:
+            # Buscar artículo en la base de datos
+            self.cursor.execute(
+                "SELECT nombre, precio, existencia FROM Articulo WHERE codigo = %s",
+                (codigo,)
+            )
+            row = self.cursor.fetchone()
+            
+            if not row:
+                messagebox.showwarning("Artículo no registrado", "El código no existe en la base de datos.")
+                self.barcode_entry.delete(0, tk.END)
+                return
+                
+            nombre, precio, existencia = row
+            
+            # Pedir cantidad al usuario
+            cantidad = simpledialog.askinteger(
+                "Cantidad",
+                "Ingrese la cantidad:",
+                parent=self.container,
+                minvalue=1,
+                initialvalue=1
+            )
+            
+            if cantidad and self.add_article(codigo, nombre, precio, existencia, cantidad):
+                self.barcode_entry.delete(0, tk.END)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al buscar artículo: {str(e)}")
+
+    
+    
     def show_sale_ui(self):
         self._limpiar_contenedor()
         self.container.configure(bg="white")
@@ -52,6 +109,13 @@ class VentaApp:
         # Botón Agregar Artículo
         sf = tk.Frame(self.container, bg="white", padx=10, pady=5)
         sf.pack(fill=tk.X)
+        
+        tk.Label(sf, text="Código de barras:", bg="white",font=("tahoma",10)).pack(side=tk.LEFT)
+        self.barcode_entry = ttk.Entry(sf, width=20)
+        self.barcode_entry.pack(side=tk.LEFT, padx=5)
+        self.barcode_entry.bind("<Return>", self.handle_barcode_entry)
+        
+        
         ttk.Button(sf, text="Agregar Artículo", style="Azul.TButton", command=self.show_selector_ui).pack(side=tk.LEFT)
 
         # Tabla ticket
@@ -120,7 +184,7 @@ class VentaApp:
             pass  # Si no hay ícono, continuar sin él
 
         # Eliminar y vaciar
-        ttk.Button(sf, text="Eliminar Articulo", style="Advertencia.TButton", command=self.del_producto).pack(side=tk.LEFT, padx=15)
+        ttk.Button(sf, text="Eliminar Articulo", style="Turquesa.TButton", command=self.del_producto).pack(side=tk.LEFT, padx=15)
         ttk.Button(bf, text="Vaciar Ticket", style="Peligro.TButton", command=self.clear_ticket).pack(side=tk.LEFT, padx=5)
 
         # Subtotal y Total
@@ -137,6 +201,8 @@ class VentaApp:
                   command=self._open_metodo_pago).pack(pady=5)
 
         self.refresh_ticket()
+        self.container.bind_all('<Alt_L>', lambda event: self.show_selector_ui())
+
 
     def load_clients(self):
         # Carga lista de clientes con su teléfono como clave directamente de la BD
@@ -155,17 +221,29 @@ class VentaApp:
 
     def show_selector_ui(self):
         self._limpiar_contenedor()
-        ArticuloSelector(self.container, self.on_select)
+        ArticuloSelector(
+            self.container, 
+            on_select_callback=self.on_select,
+            on_cancel_callback=self.show_sale_ui  # Para volver al módulo de ventas
+        )
 
     def on_select(self, data):
-        codigo, nombre, precio, existencia = data
-        if codigo in self.items:
-            if self.items[codigo][2] + 1 > int(existencia):
-                return messagebox.showwarning("Sin stock", "No hay suficiente existencia.")
-            self.items[codigo][2] += 1
+        if len(data) == 5:
+            codigo, nombre, precio, existencia, cantidad = data
         else:
-            self.items[codigo] = [nombre, float(precio), 1, int(existencia)]
-        self.show_sale_ui()
+            codigo, nombre, precio, existencia = data
+            cantidad = 1
+        # Verifica si el Treeview existe antes de actualizarlo
+        if hasattr(self, 'tree') and self.tree.winfo_exists():
+            success = self.add_article(codigo, nombre, precio, existencia)
+            if success:
+                self.refresh_ticket()
+            else:
+                messagebox.showwarning("Error", "No se pudo agregar el artículo")
+        else:
+            # Si no existe la interfaz, recrea la vista de ventas
+            self.show_sale_ui()
+            self.add_article(codigo, nombre, precio, existencia, cantidad)
 
     def _open_metodo_pago(self):
         # Abrir Toplevel para método de pago
