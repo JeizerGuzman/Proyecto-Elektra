@@ -18,10 +18,9 @@ python -m venv env23270653
 Paso 3. Para activar el entorno virtual en futuras sesiones, ejecutar: 
 env23270653\Scripts\activate
 
-Paso 4. Instalar las librerías necesarias ejecutando los siguientes comandos:
-pip install Pillow
-pip install mysql-connector-python
-pip install reportlab
+Paso 4. Instalar las librerías necesarias ejecutando el siguientes comando:
+pip install -r requirements.txt
+
 
 Paso 5. Configurar el archivo conexion.py con los datos personales de conexión.
 
