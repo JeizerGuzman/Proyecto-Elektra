@@ -265,3 +265,21 @@ INSERT INTO Articulo (
      9,   -- Herramientas y Ferretería
     15,   -- Truper México
      1);  -- Pieza
+
+
+-- Extension de mas articulos de elektra 
+
+INSERT INTO Articulo (
+  codigo, nombre, precio, costo, existencia, reorden,
+  id_categoria, id_proveedor, id_unidad
+) VALUES
+  ("7501031312345", 'Refrigerador Samsung RT29K571JS8', 17999.00, 14500.00, 10, 3, 6, 1, 1),
+  ("7501293305678", 'Pantalla LG Smart TV 50" UHD 4K', 11499.00, 9000.00, 12, 4, 2, 2, 1),
+  ("7501094201111", 'iPhone 14 128GB Medianoche', 18999.00, 16000.00, 8, 2, 3, 3, 1),
+  ("7501022908765", 'Laptop HP Pavilion 15.6" Ryzen 7', 15499.00, 12500.00, 6, 2, 4, 4, 1),
+  ("7501032237896", 'Barra de Sonido Sony HT-S400 2.1', 4499.00, 3600.00, 10, 2, 5, 5, 1),
+  ("7501021144221", 'Cama Matrimonial Dico Venice Café', 9999.00, 7800.00, 5, 1, 7, 9, 1),
+  ("7501025567834", 'Escritorio Oficina Roble Oscuro', 2899.00, 2100.00, 15, 3, 8, 10, 1),
+  ("7501055554321", 'Cortadora Truper Industrial 14"', 3199.00, 2550.00, 7, 2, 9, 15, 1),
+  ("7501002223456", 'Tenis Nike Air Max 270 Hombre', 2999.00, 2200.00, 20, 5, 11, 8, 11),
+  ("7501098765432", 'Set Belleza Conair Secadora + Plancha', 1599.00, 1200.00, 18, 4, 12, 5, 10);
