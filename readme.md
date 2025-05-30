@@ -30,4 +30,5 @@ env/
 **pycache**/
 \*.pyc
 
-Paso 7. Ejecutar el programa con el siguiente comando: python contraseña.py
+Paso 7. Ejecutar el programa con el siguiente comando: python contraseña.py o py contraseña.py
+Nota: La contraseña del administrador es "07" y del vendedor general es "elektra"
